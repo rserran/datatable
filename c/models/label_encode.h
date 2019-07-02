@@ -65,7 +65,7 @@ dtptr create_dt_labels_str(const std::unordered_map<std::string, element_t<stype
   sb.commit_and_start_new_chunk(0);
 
   size_t i = 0;
-  for (const std::pair<std::string, element_t<stype_to>>& label : labels_map) {
+  for (const auto& label : labels_map) {
     sb.write(label.first);
     ids_data[i] = label.second;
     i++;
@@ -124,12 +124,11 @@ void label_encode_fw(const Column* col, dtptr& dt_labels, dtptr& dt_encoded) {
         outdata[irow] = labels_map[v];
       } else {
         lock.exclusive_start();
-        if (stype_to == SType::BOOL && labels_map.size() == 2) {
-          throw ValueError() << "Target column for binomial problem cannot "
-                                "contain more than two labels";
-        }
-
         if (labels_map.count(v) == 0) {
+          if (stype_to == SType::BOOL && labels_map.size() == 2) {
+            throw ValueError() << "Target column for binomial problem cannot "
+                                  "contain more than two labels";
+          }
           size_t nlabels = labels_map.size();
           labels_map[v] = static_cast<T_to>(nlabels);
           outdata[irow] = labels_map[v];
@@ -192,12 +191,11 @@ void label_encode_str(const Column* col, dtptr& dt_labels, dtptr& dt_encoded) {
         outdata[irow] = labels_map[v];
       } else {
         lock.exclusive_start();
-        if (stype_to == SType::BOOL && labels_map.size() == 2) {
-          throw ValueError() << "Target column for binomial problem cannot "
-                                "contain more than two labels";
-        }
-
         if (labels_map.count(v) == 0) {
+          if (stype_to == SType::BOOL && labels_map.size() == 2) {
+            throw ValueError() << "Target column for binomial problem cannot "
+                                  "contain more than two labels";
+          }
           size_t nlabels = labels_map.size();
           labels_map[v] = static_cast<T_to>(nlabels);
           outdata[irow] = labels_map[v];
