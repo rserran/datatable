@@ -22,8 +22,9 @@ namespace dt {
 namespace progress {
 
 
-// Static instance
-progress_manager manager;
+// Static instance; it will be re-initialized when forking -- see
+// `parallel/thread_pool.cc::_child_cleanup_after_fork()`
+progress_manager* manager = new progress_manager;
 
 
 
@@ -46,6 +47,7 @@ void progress_manager::start_work(work* task) {
 
 
 void progress_manager::finish_work(work* task, bool successfully) {
+  (void) task;
   xassert(!tasks.empty() && tasks.top() == task);
   xassert(pbar != nullptr);
   tasks.pop();
