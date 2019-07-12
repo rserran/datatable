@@ -179,17 +179,14 @@ bool _obj::is_dict()          const noexcept { return v && PyDict_Check(v); }
 bool _obj::is_buffer()        const noexcept { return v && PyObject_CheckBuffer(v); }
 bool _obj::is_range()         const noexcept { return v && PyRange_Check(v); }
 bool _obj::is_slice()         const noexcept { return v && PySlice_Check(v); }
+bool _obj::is_generator()     const noexcept { return v && PyGen_Check(v); }
 
 bool _obj::is_iterable() const noexcept {
   return v && (v->ob_type->tp_iter || PySequence_Check(v));
 }
 
 bool _obj::is_frame() const noexcept {
-  if (!v) return false;
-  auto typeptr = reinterpret_cast<PyObject*>(&py::Frame::Type::type);
-  int ret = PyObject_IsInstance(v, typeptr);
-  if (ret == -1) PyErr_Clear();
-  return (ret == 1);
+  return py::Frame::check(v);
 }
 
 bool _obj::is_join_node() const noexcept {

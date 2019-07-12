@@ -89,6 +89,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   a plugin for Sphinx. This module adds directive `.. dtframe` that allows
   to easily include a Frame display in an .rst document.
 
+- Frame can now be treated as an iterable over the columns. Thus, a Frame
+  object can now be used in a for-loop, producing its individual columns.
+
 
 ### Fixed
 
@@ -169,6 +172,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed a crash when replacing values in a str64 column (#1890).
 
+- `cbind()` no longer throws an error when passed a generator producing
+  temporary frames (#1905).
+
 
 ### Changed
 
@@ -188,6 +194,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `datatable` no longer uses OpenMP for parallelism. Instead, we use our own
   thread pool to perform multi-threaded computations (#1736).
 
+- Parameter `progress_fn` in function `dt.models.aggregate()` is removed.
+  In its place you can set the global option `dt.options.progress.callback`.
+
+- Removed deprecated Frame methods `.topython()`, `.topandas()`, `.tonumpy()`,
+  and `Frame.__call__()`.
+
 
 ### Deprecated
 
@@ -201,10 +213,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   other `.to_*()` methods). The old name is still usable, but marked as
   deprecated and will be removed in 0.10.0.
 
-- Parameter `progress_fn` in function `dt.models.aggregate()` is deprecated,
-  to be removed in 0.9.0. In its place you can set the global option
-  `dt.options.progress.callback`.
-
 
 ### Notes
 
@@ -217,7 +225,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - [Hawk Berry][] (#1834),
   - [Jonathan McKinney][] (#1816, #1837),
   - [NachiGithub][] (#1789, #1793),
-  - [Pasha Stetsenko][] (#1672, #1694, #1695, #1697, #1703, #1705)
+  - [Pasha Stetsenko][] (#1672, #1694, #1695, #1697, #1703, #1705, #1905)
   - [Tom Kraljevic][] (#1805)
   - [XiaomoWu][] (#1825)
 
