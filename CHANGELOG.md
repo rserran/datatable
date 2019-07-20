@@ -92,6 +92,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Frame can now be treated as an iterable over the columns. Thus, a Frame
   object can now be used in a for-loop, producing its individual columns.
 
+- A Frame can now be treated as a mapping; in particular both `dict(frame)`
+  and `**frame` are now valid.
+
+- Single-column frames can be be used as sources for Frame construction.
+
+- CSV writer now quotes fields containing single-quote mark (`'`).
+
 
 ### Fixed
 
@@ -175,6 +182,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `cbind()` no longer throws an error when passed a generator producing
   temporary frames (#1905).
 
+- Fixed comparison of string columns vs. value `None` (#1912).
+
+- Fixed a crash when trying to select individual cells from a joined Frame,
+  for the cells that were un-matched during the join (#1917).
+
+- Fixed a crash when writing a joined frame into CSV (#1919).
+
 
 ### Changed
 
@@ -200,6 +214,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Removed deprecated Frame methods `.topython()`, `.topandas()`, `.tonumpy()`,
   and `Frame.__call__()`.
 
+- Syntax `DT[col]` has been restored (was previously deprecated in 0.7.0),
+  however it works only for `col` an integer or a string. Support for slices
+  may be added in the future, or not: there is a potential to confuse
+  `DT[a:b]` for a row selection. A column slice may still be selected via
+  the i-j selector `DT[:, a:b]`.
+
 
 ### Deprecated
 
@@ -219,14 +239,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Thanks to everyone who helped make `datatable` more stable by discovering
   and reporting bugs that were fixed in this release:
 
-  - [Arno Candel][] (#1619, #1730, #1738, #1800, #1803, #1846, #1857, #1890, #1891),
+  - [Arno Candel][] (#1619, #1730, #1738, #1800, #1803, #1846, #1857, #1890,
+    #1891, #1919),
+
   - [Antorsae][] (#1639),
+
   - [Olivier][] (#1872),
+
   - [Hawk Berry][] (#1834),
+
   - [Jonathan McKinney][] (#1816, #1837),
+
+  - [Mateusz Dymczyk][] (#1912),
+
   - [NachiGithub][] (#1789, #1793),
-  - [Pasha Stetsenko][] (#1672, #1694, #1695, #1697, #1703, #1705, #1905)
-  - [Tom Kraljevic][] (#1805)
+
+  - [Pasha Stetsenko][] (#1672, #1694, #1695, #1697, #1703, #1705, #1905,
+    #1917),
+
+  - [Tom Kraljevic][] (#1805),
+
   - [XiaomoWu][] (#1825)
 
 
@@ -1146,6 +1178,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 [hawk berry]: https://github.com/hawkberry
 [jonathan mckinney]: https://github.com/pseudotensor
 [joseph granados]: https://github.com/g-eoj
+[mateusz dymczyk]: https://github.com/mdymczyk
 [megan kurka]: https://github.com/meganjkurka
 [michael frasco]: https://github.com/mfrasco
 [michal raška]: https://github.com/michal-raska
