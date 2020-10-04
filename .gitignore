@@ -8,8 +8,8 @@ __pycache__/
 .cache/
 build/
 dist/
-datatable/lib/*
-!datatable/lib/__init__.py
+src/datatable/lib/*
+!src/datatable/lib/__init__.py
 *.egg-info/
 
 
@@ -22,6 +22,7 @@ coverage.info
 .benchmarks
 .pytest_cache/
 random_attack_logs/
+tests_random/logs/
 
 
 # Sphinx documentation
@@ -50,6 +51,7 @@ microbench/groupby/groupby
 
 
 # Auto-generated files
-datatable/__git__.py
-.asan/
-ci/fast.mk
+src/datatable/_build_info.py
+
+# vscode settings
+.vscode/settings.json

@@ -4,12 +4,23 @@
 #   License, v. 2.0. If a copy of the MPL was not distributed with this
 #   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #-------------------------------------------------------------------------------
+import math
 import os
 import pytest
 import random
 import sys
 from math import isnan
-from datatable.internal import frame_column_rowindex, frame_integrity_check
+from datatable.lib import core
+from datatable.internal import frame_columns_virtual, frame_integrity_check
+
+
+
+cpp_test = pytest.mark.skipif(not hasattr(core, "get_test_suites"),
+                              reason="C++ tests were not compiled")
+
+skip_on_jenkins = pytest.mark.skipif(os.environ.get("DT_HARNESS") == "Jenkins",
+                                     reason="Skipped on Jenkins")
+
 
 
 # Try importing _datatable (core lib), so that if that doesn't work we don't
@@ -34,71 +45,33 @@ except ImportError as e:
 
 
 
-def same_iterables(a, b):
-    """
-    Convenience function for testing datatables created from dictionaries.
-
-    On Python3.6+ it simply checks whether `a == b`. However on Python3.5, it
-    checks whether `a` and `b` have same elements but potentially in a different
-    order.
-
-    The reason for this helper function is the difference between semantics of
-    a dictionary in Python3.6 versus older versions: in Python3.6 dictionaries
-    preserved the order of their keys, whereas in previous Python versions they
-    didn't. Thus, if one creates say a datatable
-
-        dt = datatable.Frame({"A": 1, "B": "foo", "C": 3.5})
-
-    then in Python3.6 it will be guaranteed to have columns ("A", "B", "C") --
-    in this order, whereas in Python3.5 or older the order may be arbitrary.
-    Thus, this function is designed to help with testing of such a datatable:
-
-        assert same_iterables(dt.names, ("A", "B", "C"))
-        assert same_iterables(dt.types, ("int", "string", "float"))
-
-    Then in Python3.6 lhs and rhs will be tested with strict equality, whereas
-    in older Python versions the test will be weaker, taking into account the
-    non-deterministic nature of the dictionary that created the datatable.
-    """
-    ta = type(a)
-    tb = type(b)
-    if ta != tb or len(a) != len(b):
-        return False
-    if sys.version_info >= (3, 6):
-        return list_equals(a, b)
-    else:
-        js = set(range(len(a)))
-        for ai in a:
-            found = False
-            for j in js:
-                if list_equals(ai, b[j]):
-                    found = True
-                    js.remove(j)
-                    break
-            if not found:
-                return False
-        return True
-
-
-
-def list_equals(a, b):
+def list_equals(a, b, rel_tol = 1e-7, abs_tol = None):
     """
     Helper functions that tests whether two lists `a` and `b` are equal.
 
     The primary difference from the built-in Python equality operator is that
-    this function compares floats up to a relative tolerance of 1e-6, and it
-    also compares floating NaN as equal to itself (in standard Python
-    `nan != nan`).
+    this function compares floats up to a relative tolerance of `rel_tol`
+    and absolute tolerance of `abs_tol`. It also compares floating NaN as
+    equal to itself (in standard Python `nan != nan`).
     The purpose of this function is to compare datatables' python
     representations.
     """
-    if a == b: return True
+
+    # The default value of `abs_tol` is set to `rel_tol`
+    if abs_tol is None:
+        abs_tol = rel_tol
+
+    if a == b:
+        return True
     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-        if isnan(a) and isnan(b): return True
-        if abs(a - b) < 1e-6 * (abs(a) + abs(b) + 1): return True
+        if isnan(a) and isnan(b):
+            return True
+        if abs(a - b) < max(rel_tol * max(abs(a), abs(b)), abs_tol):
+            return True
     if isinstance(a, list) and isinstance(b, list):
         return (len(a) == len(b) and
-                all(list_equals(a[i], b[i]) for i in range(len(a))))
+                all(list_equals(a[i], b[i], rel_tol = rel_tol, abs_tol = abs_tol)
+                    for i in range(len(a))))
     return False
 
 
@@ -120,14 +93,36 @@ def assert_equals(frame1, frame2):
         assert frame1.stypes == frame2.stypes, (
             "The left frame has stypes %r, while the right has stypes %r"
             % (frame1.stypes, frame2.stypes))
-        assert frame1.to_list() == frame2.to_list(), (
-            "The frames have different data:\n"
-            "LHS = %r\nRHS = %r" % (frame1.to_list(), frame2.to_list()))
+        data1 = frame1.to_list()
+        data2 = frame2.to_list()
+        assert len(data1) == len(data2)  # shape check should ensure this
+        for i in range(len(data1)):
+            col1 = data1[i]
+            col2 = data2[i]
+            assert len(col1) == len(col2)
+            for j in range(len(col1)):
+                val1 = col1[j]
+                val2 = col2[j]
+                if val1 == val2: continue
+                if isinstance(val1, float) and isinstance(val2, float):
+                    if math.isclose(val1, val2): continue
+                if len(col1) > 16:
+                    arr1 = repr(col1[:16])[:-1] + ", ...]"
+                    arr2 = repr(col2[:16])[:-1] + ", ...]"
+                else:
+                    arr1 = repr(col1)
+                    arr2 = repr(col2)
+                raise AssertionError(
+                    "The frames have different data in column %d `%s` at "
+                    "index %d: LHS has %r, and RHS has %r\n"
+                    "  LHS = %s\n"
+                    "  RHS = %s\n"
+                    % (i, frame1.names[i], j, val1, val2, arr1, arr2))
     else:
         assert frame1.shape == frame2.shape
-        assert same_iterables(frame1.names, frame2.names)
-        assert same_iterables(frame1.stypes, frame2.stypes)
-        assert same_iterables(frame1.to_list(), frame2.to_list())
+        assert list_equals(frame1.names, frame2.names)
+        assert list_equals(frame1.stypes, frame2.stypes)
+        assert list_equals(frame1.to_list(), frame2.to_list())
 
 
 
@@ -177,5 +172,15 @@ def assert_value_error(f, msg):
 
 
 def isview(frame):
-    return any(frame_column_rowindex(frame, i) is not None
-               for i in range(frame.ncols))
+    return any(frame_columns_virtual(frame))
+
+
+def get_core_tests(suite):
+    # This must be a function, so that `n` is properly captured within
+    def param(n):
+        return pytest.param(lambda: n, id=n)
+
+    if hasattr(core, "get_test_suites"):
+        return [param(n) for n in core.get_tests_in_suite(suite)]
+    else:
+        return [pytest.param(lambda: pytest.skip("C++ tests not compiled"))]

@@ -1,470 +1,381 @@
 
-math module
-===========
-
-``datatable`` provides the similar set of mathematical functions, as Python's
-standard `math module`_, or `numpy math functions`_. Below is the comparison
-table showing which functions are available:
-
-
-==================  ====================  ================================
-math                numpy                 datatable
-==================  ====================  ================================
-**Trigonometric/hyperbolic functions**
---------------------------------------------------------------------------
-``sin(x)``          ``sin(x)``            :func:`sin(x) <sin>`
-``cos(x)``          ``cos(x)``            :func:`cos(x) <cos>`
-``tan(x)``          ``tan(x)``            :func:`tan(x) <tan>`
-``asin(x)``         ``arcsin(x)``         :func:`arcsin(x) <arcsin>`
-``acos(x)``         ``arccos(x)``         :func:`arccos(x) <arccos>`
-``atan(x)``         ``arctan(x)``         :func:`arctan(x) <arctan>`
-``atan2(y, x)``     ``arctan2(y, x)``     :func:`arctan2(y, x) <arctan2>`
-``sinh(x)``         ``sinh(x)``           :func:`sinh(x) <sinh>`
-``cosh(x)``         ``cosh(x)``           :func:`cosh(x) <cosh>`
-``tanh(x)``         ``tanh(x)``           :func:`tanh(x) <tanh>`
-``asinh(x)``        ``arcsinh(x)``        :func:`arsinh(x) <arsinh>`
-``acosh(x)``        ``arccosh(x)``        :func:`arcosh(x) <arcosh>`
-``atanh(x)``        ``arctanh(x)``        :func:`artanh(x) <artanh>`
-``hypot(x, y)``     ``hypot(x, y)``       :func:`hypot(x, y) <hypot>`
-``radians(x)``      ``deg2rad(x)``        :func:`deg2rad(x) <deg2rad>`
-``degrees(x)``      ``rad2deg(x)``        :func:`rad2deg(x) <rad2deg>`
-
-**Exponential/logarithmic/power functions**
---------------------------------------------------------------------------
-``exp(x)``          ``exp(x)``            :func:`exp(x) <exp>`
-\                   ``exp2(x)``           :func:`exp2(x) <exp2>`
-``expm1(x)``        ``expm1(x)``          :func:`expm1(x) <expm1>`
-``log(x)``          ``log(x)``            :func:`log(x) <log>`
-``log10(x)``        ``log10(x)``          :func:`log10(x) <log10>`
-``log1p(x)``        ``log1p(x)``          :func:`log1p(x) <log1p>`
-``log2(x)``         ``log2(x)``           :func:`log2(x) <log2>`
-\                   ``logaddexp(x, y)``
-\                   ``logaddexp2(x, y)``
-\                   ``cbrt(x)``           :func:`cbrt(x) <cbrt>`
-``pow(x, a)``       ``power(x, a)``       :func:`power(x, a) <power>`
-``sqrt(x)``         ``sqrt(x)``           :func:`sqrt(x) <sqrt>`
-\                   ``square(x)``         :func:`square(x) <square>`
-
-**Special mathematical functions**
---------------------------------------------------------------------------
-``erf(x)``                                :func:`erf(x) <erf>`
-``erfc(x)``                               :func:`erfc(x) <erfc>`
-``gamma(x)``                              :func:`gamma(x) <gamma>`
-\                   ``heaviside(x)``
-\                   ``i0(x)``
-``lgamma(x)``                             :func:`lgamma(x) <lgamma>`
-\                   ``sinc(x)``
-
-**Floating-point functions**
---------------------------------------------------------------------------
-``ceil(x)``         ``ceil(x)``           :func:`ceil(x) <ceil>`
-``copysign(x, y)``  ``copysign(x, y)``
-``fabs(x)``         ``fabs(x)``           :func:`fabs(x) <fabs>`
-``floor(x)``        ``floor(x)``          :func:`floor(x) <floor>`
-``frexp(x)``        ``frexp(x)``
-``isclose(x, y)``   ``isclose(x, y)``
-``isfinite(x)``     ``isfinite(x)``       :func:`isfinite(x) <isfinite>`
-``isinf(x)``        ``isinf(x)``          :func:`isinf(x) <isinf>`
-``isnan(x)``        ``isnan(x)``          :func:`isna(x) <isna>`
-``ldexp(x, n)``     ``ldexp(x, n)``
-\                   ``nextafter(x)``
-\                   ``rint(x)``
-\                   ``sign(x)``           :func:`sign(x) <sign>`
-\                   ``spacing(x)``
-\                   ``signbit(x)``
-``trunc(x)``        ``trunc(x)``          :func:`trunc(x) <trunc>`
-
-**Miscellaneous**
---------------------------------------------------------------------------
-``abs(x)``          ``abs(x)``            :func:`abs(x) <abs>`
-\                   ``clip(x, a, b)``
-\                   ``divmod(x, y)``
-``factorial(n)``
-``fmod(x, y)``      ``fmod(x, y)``
-``gcd(a, b)``       ``gcd(a, b)``
-\                   ``maximum(x, y)``
-\                   ``minimum(x, y)``
-``modf(x)``         ``modf(x)``
-
-**Mathematical constants**
---------------------------------------------------------------------------
-``e``               ``e``                 :const:`e`
-\                   \                     :const:`golden`
-``inf``             ``inf``               :const:`inf`
-``nan``             ``nan``               :const:`nan`
-``pi``              ``pi``                :const:`pi`
-``tau``                                   :const:`tau`
-==================  ====================  ================================
+.. py:module:: datatable.math
 
+.. xpy:module:: datatable.math
 
-Trigonometric/hyperbolic functions
-----------------------------------
+datatable.math
+==============
 
-.. function:: sin(x)
 
-    Compute the trigonometric sine of angle ``x`` measured in radians.
+Trigonometric functions
+-----------------------
 
-    This function can only be applied to numeric columns (real, integer, or
-    boolean), and produces a float64 result, except when the argument ``x`` is
-    float32, in which case the result is float32 as well.
+.. list-table::
+   :widths: auto
+   :class: api-table
 
-.. function:: cos(x)
+   * - :func:`sin(x)`
+     - Compute :math:`\sin x` (the trigonometric sine of ``x``).
 
-    Compute the trigonometric cosine of angle ``x`` measured in radians.
+   * - :func:`cos(x)`
+     - Compute :math:`\cos x` (the trigonometric cosine of ``x``).
 
-    This function can only be applied to numeric columns (real, integer, or
-    boolean), and produces a float64 result, except when the argument ``x`` is
-    float32, in which case the result is float32 as well.
+   * - :func:`tan(x)`
+     - Compute :math:`\tan x` (the trigonometric tangent of ``x``).
 
+   * - :func:`arcsin(x)`
+     - Compute :math:`\sin^{-1} x` (the inverse sine of ``x``).
 
-.. function:: tan(x)
+   * - :func:`arccos(x)`
+     - Compute :math:`\cos^{-1} x` (the inverse cosine of ``x``).
 
-    Compute the trigonometric tangent of ``x``, which is the ratio
-    ``sin(x)/cos(x)``.
+   * - :func:`arctan(x)`
+     - Compute :math:`\tan^{-1} x` (the inverse tangent of ``x``).
 
-    This function can only be applied to numeric columns (real, integer, or
-    boolean), and produces a float64 result, except when the argument ``x`` is
-    float32, in which case the result is float32 as well.
+   * - :func:`atan2(x, y)`
+     - Compute :math:`\tan^{-1} (x/y)`.
 
+   * - :func:`hypot(x, y)`
+     - Compute :math:`\sqrt{x^2 + y^2}`.
 
-.. function:: arcsin(x)
+   * - :func:`deg2rad(x)`
+     - Convert an angle measured in degrees into radians.
 
-    The inverse trigonometric sine of ``x``. In mathematics, this may also be
-    written as :math:`\sin^{-1}x`. This function satisfies the property that
-    ``sin(arcsin(x)) == x`` for all ``x`` in the interval ``[-1, 1]``.
+   * - :func:`rad2deg(x)`
+     - Convert an angle measured in radians into degrees.
 
-    For the values of ``x`` that are greater than 1 in magnitude, the function
-    arc-sine produces NA values.
 
+Hyperbolic functions
+--------------------
 
-.. function:: arccos(x)
+.. list-table::
+   :widths: auto
+   :class: api-table
 
-    The inverse trigonometric cosine of ``x``. In mathematics, this may also be
-    written as :math:`\cos^{-1}x`. This function satisfies the property that
-    ``cos(arccos(x)) == x`` for all ``x`` in the interval ``[-1, 1]``.
+   * - :func:`sinh(x)`
+     - Compute :math:`\sinh x` (the hyperbolic sine of ``x``).
 
-    For the values of ``x`` that are greater than 1 in magnitude, the function
-    arc-sine produces NA values.
+   * - :func:`cosh(x)`
+     - Compute :math:`\cosh x` (the hyperbolic cosine of ``x``).
 
+   * - :func:`tanh(x)`
+     - Compute :math:`\tanh x` (the hyperbolic tangent of ``x``).
 
-.. function:: arctan(x)
+   * - :func:`arsinh(x)`
+     - Compute :math:`\sinh^{-1} x` (the inverse hyperbolic sine of ``x``).
 
-    The inverse trigonometric tangent of ``x``. This function satisfies the
-    property that ``tan(arctan(x)) == x``.
+   * - :func:`arcosh(x)`
+     - Compute :math:`\cosh^{-1} x` (the inverse hyperbolic cosine of ``x``).
 
-
-.. function:: arctan2(y, x)
-
-    The inverse trigonometric tangent of ``y/x``, taking into account the signs
-    of ``x`` and ``y`` to produce the correct result.
-
-    If ``(x,y)`` is a point in a Cartesian plane, then ``arctan2(y, x)`` returns
-    the radian measure of an angle formed by 2 rays: one starting at the origin
-    and passing through point ``(0,1)``, and the other starting at the origin
-    and passing through point ``(x,y)``. The angle is assumed positive if the
-    rotation from the first ray to the second occurs counter-clockwise, and
-    negative otherwise.
-
-    As a special case, ``arctan2(0, 0) == 0``, and ``arctan2(0, -1) == tau/2``..
-
-
-.. function:: sinh(x)
-
-    The hyperbolic sine of ``x``, defined as
-    :math:`\sinh(x) = \frac12(e^x - e^{-x})``.
-
-
-.. function:: cosh(x)
-
-    The hyperbolic cosine of ``x``, defined as
-    :math:`\cosh(x) = \frac12(e^x + e^{-x})``.
-
-
-.. function:: tanh(x)
-
-    The hyperbolic tangent of ``x``, defines as
-    :math:`\tanh(x) = \frac{\sinh x}{\cosh x} = \frac{e^x-e^{-x}}{e^x+e^{-x}}``.
-
-
-.. function:: arsinh(x)
-
-    The inverse hyperbolic sine of ``x``. This function satisfies the property
-    that ``sinh(arcsinh(x)) == x``. Alternatively, this function can also be
-    computed as :math:`\sinh^{-1}(x) = \ln(x + \sqrt{x^2 + 1})`.
-
-
-.. function:: arcosh(x)
-
-    The inverse hyperbolic cosine of ``x``. This function satisfies the property
-    that ``cosh(arccosh(x)) == x``. Alternatively, this function can also be
-    computed as :math:`\cosh^{-1}(x) = \ln(x + \sqrt{x^2 - 1})`.
-
-
-.. function:: artanh(x)
-
-    The inverse hyperbolic tangent of ``x``. This function satisfies the property
-    that ``sinh(arcsinh(x)) == x``. Alternatively, this function can also be
-    computed as :math:`\tanh^{-1}(x) = \frac12\ln\frac{1+x}{1-x}`.
-
-
-.. function:: hypot(x, y)
-
-    The length of a hypotenuse in a right triangle with sides ``x`` and ``y``,
-    i.e. :math:`\operatorname{hypot}(x, y) = \sqrt{x^2 + y^2}`.
-
-
-.. function:: deg2rad(x)
-
-    Convert an angle measured in degrees into radians:
-    :math:`\operatorname{deg2rad}(x) = x\cdot\frac{\tau}{360}`.
-
-
-.. function:: rad2deg(x)
-
-    Convert an angle measured in radians into degrees:
-    :math:`\operatorname{rad2deg}(x) = x\cdot\frac{360}{\tau}`.
-
-
+   * - :func:`artanh(x)`
+     - Compute :math:`\tanh^{-1} x` (the inverse hyperbolic tangent of ``x``).
 
 
 Exponential/logarithmic functions
 ---------------------------------
 
-.. function:: exp(x)
+.. list-table::
+   :widths: auto
+   :class: api-table
 
-    The exponent of ``x``, i.e. Euler's number :const:`e` raised to the power
-    ``x``.
+   * - :func:`exp(x)`
+     - Compute :math:`e^x` (the exponent of ``x``).
 
+   * - :func:`exp2(x)`
+     - Compute :math:`2^x`.
 
-.. function:: exp2(x)
+   * - :func:`expm1(x)`
+     - Compute :math:`e^x - 1`.
 
-    Two raised to the power ``x``.
+   * - :func:`log(x)`
+     - Compute :math:`\ln x` (the natural logarithm of ``x``).
 
+   * - :func:`log10(x)`
+     - Compute :math:`\log_{10} x` (the decimal logarithm of ``x``).
 
-.. function:: expm1(x)
+   * - :func:`log1p(x)`
+     - Compute :math:`\ln(1 + x)`.
 
-    Computes :math:`e^x - 1`, however offering a better precision than
-    ``exp(x) - 1`` for small values of ``x``.
+   * - :func:`log2(x)`
+     - Compute :math:`\log_{2} x` (the binary logarithm of ``x``).
 
+   * - :func:`logaddexp(x)`
+     - Compute :math:`\ln(e^x + e^y)`.
 
-.. function:: log(x)
+   * - :func:`logaddexp2(x)`
+     - Compute :math:`\log_2(2^x + 2^y)`.
 
-    The natural logarithm of ``x``. This function is the inverse of ``exp(x)``:
-    ``exp(log(x)) == x``.
+   * - :func:`cbrt(x)`
+     - Compute :math:`\sqrt[3]{x}` (the cubic root of ``x``).
 
+   * - :func:`pow(x, a)`
+     - Compute :math:`x^a`.
 
-.. function:: log10(x)
+   * - :func:`sqrt(x)`
+     - Compute :math:`\sqrt{x}` (the square root of ``x``).
 
-    The base-10 logarithm of ``x``, also denoted as :math:`\lg(x)` in
-    mathematics. This function is the inverse of ``power(10, x)``.
-
-
-.. function:: log1p(x)
-
-    The natural logarithm of 1 plus ``x``, i.e. :math:`\ln(1 + x)`.
-
-
-.. function:: log2(x)
-
-    The base-2 logarithm of ``x``, this function is the inverse of ``exp2(x)``.
-
-
-.. function:: cbrt(x)
-
-    Compute the cubic root of ``x``, i.e. :math:`\sqrt[3]{x}`.
-
-
-.. function:: power(x, a)
-
-    Raise ``x`` to the power ``a``, i.e. calculate :math:`x^a`.
-
-
-.. function:: sqrt(x)
-
-    The square root of ``x``, i.e. :math:`\sqrt{x}`.
-
-
-.. function:: square(x)
-
-    The square of ``x``, i.e. :math:`x^2`.
-
+   * - :func:`square(x)`
+     - Compute :math:`x^2` (the square of ``x``).
 
 
 Special mathemetical functions
 ------------------------------
 
-.. function:: erf(x)
+.. list-table::
+   :widths: auto
+   :class: api-table
 
-    The error function :math:`\operatorname{erf}(x)`.
+   * - :func:`erf(x)`
+     - The error function :math:`\operatorname{erf}(x)`.
 
-    This function is defined as the integral
-    :math:`\operatorname{erf}(x) = \frac{2}{\sqrt{\pi}} \int^x_0 e^{-t^2}dt`.
-    This function is used in computing probabilities arising from the normal
-    distribution.
+   * - :func:`erfc(x)`
+     - The complimentary error function :math:`1 - \operatorname{erf}(x)`.
 
+   * - :func:`gamma(x)`
+     - Euler gamma function of ``x``.
 
-.. function:: erfc(x)
-
-    The complementary error function
-    :math:`\operatorname{erfc}(x) = 1 - \operatorname{erf}(x)`.
-
-    This function is defined as the integral
-    :math:`\operatorname{erfc}(x) = \frac{2}{\sqrt{\pi}} \int^{\infty}_x e^{-t^2}dt`.
-
-    For large values of ``x`` this function computes the result much more
-    precisely than ``1 - erf(x)``.
-
-
-.. function:: gamma(x)
-
-    Euler gamma function of ``x``.
-
-    The gamma function is defined for all ``x`` except for the negative
-    integers. For positive ``x`` it can be computed via the integral
-    :math:`\Gamma(x) = \int_0^\infty t^{x-1}e^{-t}dt`. For negative ``x`` it
-    can be computed as
-    :math:`\Gamma(x) = \frac{\Gamma(x + k)}{x(x+1)\cdot...\cdot(x+k-1)}`,
-    where :math:`k` is any integer such that :math:`x+k` is positive.
-
-    If `x` is a positive integer, then :math:`\Gamma(x) = (x - 1)!`.
-
-
-.. function:: lgamma(x)
-
-    Natural logarithm of the absolute value of gamma function of ``x``.
-
+   * - :func:`lgamma(x)`
+     - Natual logarithm of the Euler gamma function of.
 
 
 Floating-point functions
 ------------------------
 
-.. function:: isna(x)
+.. list-table::
+   :widths: auto
+   :class: api-table
 
-    Returns True if ``x`` is an NA value, and False otherwise.
+   * - :func:`abs(x)`
+     - Absolute value of ``x``.
 
-    - If ``x`` is a :class:`Frame`, the function is applied separately to each
-      element in the frame. The result is a new Frame where all columns are
-      boolean, and with the same shape as ``x``. Each element in this new frame
-      is a boolean indicator of whether the corresponding element in ``x`` is
-      an NA value or not.
+   * - :func:`ceil(x)`
+     - The smallest integer not less than ``x``.
 
-    - If ``x`` is a column-expression, then ``isna(x)`` is also an expression.
-      The argument column ``x`` can be of any stype, and the result is a column
-      with stype `bool8`. When evaluated within ``DT[i, j, ...]``, the expression
-      ``isna(x)`` produces a column where each element is an indicator of whether
-      the corresponding value in ``x`` is NA or not.
+   * - :func:`copysign(x, y)`
+     - Number with the magnitude of ``x`` and the sign of ``y``.
 
-    - When ``x`` is a python integer, ``isna(x)`` returns False.
+   * - :func:`fabs(x)`
+     - The absolute value of ``x``, returned as a float.
 
-    - When ``x`` is a python float, ``isna(x)`` returns False for all values of
-      ``x`` except for the float ``nan`` value.
+   * - :func:`floor(x)`
+     - The largest integer not greater than ``x``.
 
-    - ``isna(None)`` produces True.
+   * - :func:`fmod(x, y)`
+     - Remainder of a floating-point division ``x/y``.
 
+   * - :func:`isclose(x, y)`
+     - Check whether ``x ≈ y`` (up to some tolerance level).
 
-.. function:: isfinite(x)
+   * - :func:`isfinite(x)`
+     - Check if ``x`` is finite.
 
-    Returns True if ``x`` is a finite value, and False if ``x`` is a
-    positive/negative infinity of NA.
+   * - :func:`isinf(x)`
+     - Check if ``x`` is a positive or negative infinity.
 
+   * - :func:`isna(x)`
+     - Check if ``x`` is a valid (not-NaN) value.
 
-.. function:: isinf(x)
+   * - :func:`ldexp(x, y)`
+     - Compute :math:`x\cdot 2^y`.
 
-    Returns True if ``x`` is a positive or negative infinity, and False
-    otherwise.
+   * - :func:`rint(x)`
+     - Round ``x`` to the nearest integer.
 
+   * - :func:`sign(x)`
+     - The sign of ``x``, as a floating-point value.
 
+   * - :func:`signbit(x)`
+     - The sign of ``x``, as a boolean value.
 
-Miscellaneous functions
------------------------
-
-.. function:: abs(x)
-
-    Return the absolute value of ``x``. This function can only be applied
-    to numeric arguments (i.e. boolean, integer, or real).
-
-    The argument ``x`` can be one of the following:
-
-    - a :class:`Frame`, in which case the function is applied to all elements
-      of the frame, and returns a new frame with the same shape and stypes as
-      ``x``. An error will be raised if any columns in ``x`` are not numeric.
-
-    - a column-expression, in which case ``abs(x)`` is also a column-expression
-      that, when applied to some frame ``DT``, will evaluate to a column with
-      the absolute values of ``x``. The stype of the resulting column will be
-      the same as the stype of ``x``.
-
-    - an ``int``, or a ``float``, in which case ``abs(x)`` returns the absolute
-      value of that number, similar to the python built-in function ``abs()``.
-
-    **Examples**::
-
-        DT = dt.Frame(A=[-3, 2, 4, -17, 0])
-        DT[:, abs(f.A)]
-
-    .. dtframe::
-        :names: C0
-        :types: int8
-        :shape: 5, 1
-        :output:
-
-        0,   3
-        1,   2
-        2,   4
-        3,  17
-        4,   0
-
-    **See also**
-
-    - :func:`fabs`
-
-
-
+   * - :func:`trunc(x)`
+     - The value of ``x`` truncated towards zero.
 
 
 Mathematical constants
 ----------------------
 
-.. attribute:: e
+.. list-table::
+   :widths: auto
+   :class: api-table
 
-    The base of the natural logarithm, also known as the Euler's number.
-    Its value is ``2.718281828459045``.
+   * - :data:`e`
+     - Euler's constant :math:`e`.
 
+   * - :data:`golden`
+     - Golden ratio :math:`\varphi`.
 
-.. attribute:: golden
+   * - :data:`inf`
+     - Positive infinity.
 
-    The golden ratio :math:`\varphi = (1 + \sqrt{5})/2`. The value is
-    ``1.618033988749895``.
+   * - :data:`nan`
+     - Not-a-number.
 
+   * - :data:`pi`
+     - Mathematical constant :math:`\pi`.
 
-.. attribute:: inf
-
-    Positive infinity.
-
-
-.. attribute:: nan
-
-    Not-a-number, a special floating-point constant that denotes a missing
-    number. In most ``datatable`` functions you can use ``None`` instead
-    of ``nan``.
-
-
-.. attribute:: pi
-
-    Mathematical constant :math:`\pi = \frac12\tau`, the area of a circle with
-    unit radius. The constant is stored with float64 precision, and its value is
-    ``3.141592653589793``.
-
-
-.. attribute:: tau
-
-    Mathematical constant :math:`\tau = 2\pi`, the circumference of a circle
-    with unit radius. Some mathematicians believe that :math:`\tau` is the
-    `true circle constant`_, and :math:`\pi` is an impostor. The value
-    of :math:`\tau` is ``6.283185307179586``.
+   * - :data:`tau`
+     - Mathematical constant :math:`\tau`.
 
 
 
-.. _`math module`: https://docs.python.org/3/library/math.html
+Comparison table
+----------------
+
+The set of functions provided by the :mod:`datatable.math` module is very
+similar to the standard Python's :ext-mod:`math` module, or
+`numpy math functions`_. Below is the comparison table showing which functions
+are available:
+
+==================  ====================  =====================================
+math                numpy                 datatable
+==================  ====================  =====================================
+**Trigonometric/hyperbolic functions**
+-------------------------------------------------------------------------------
+``sin(x)``          ``sin(x)``            :func:`sin(x)`
+``cos(x)``          ``cos(x)``            :func:`cos(x)`
+``tan(x)``          ``tan(x)``            :func:`tan(x)`
+``asin(x)``         ``arcsin(x)``         :func:`arcsin(x)`
+``acos(x)``         ``arccos(x)``         :func:`arccos(x)`
+``atan(x)``         ``arctan(x)``         :func:`arctan(x)`
+``atan2(y, x)``     ``arctan2(y, x)``     :func:`atan2(y, x)`
+``sinh(x)``         ``sinh(x)``           :func:`sinh(x)`
+``cosh(x)``         ``cosh(x)``           :func:`cosh(x)`
+``tanh(x)``         ``tanh(x)``           :func:`tanh(x)`
+``asinh(x)``        ``arcsinh(x)``        :func:`arsinh(x)`
+``acosh(x)``        ``arccosh(x)``        :func:`arcosh(x)`
+``atanh(x)``        ``arctanh(x)``        :func:`artanh(x)`
+``hypot(x, y)``     ``hypot(x, y)``       :func:`hypot(x, y)`
+``radians(x)``      ``deg2rad(x)``        :func:`deg2rad(x)`
+``degrees(x)``      ``rad2deg(x)``        :func:`rad2deg(x)`
+
+**Exponential/logarithmic/power functions**
+-------------------------------------------------------------------------------
+``exp(x)``          ``exp(x)``            :func:`exp(x)`
+\                   ``exp2(x)``           :func:`exp2(x)`
+``expm1(x)``        ``expm1(x)``          :func:`expm1(x)`
+``log(x)``          ``log(x)``            :func:`log(x)`
+``log10(x)``        ``log10(x)``          :func:`log10(x)`
+``log1p(x)``        ``log1p(x)``          :func:`log1p(x)`
+``log2(x)``         ``log2(x)``           :func:`log2(x)`
+\                   ``logaddexp(x, y)``   :func:`logaddexp(x, y)`
+\                   ``logaddexp2(x, y)``  :func:`logaddexp2(x, y)`
+\                   ``cbrt(x)``           :func:`cbrt(x)`
+``pow(x, a)``       ``power(x, a)``       :func:`pow(x, a)`
+``sqrt(x)``         ``sqrt(x)``           :func:`sqrt(x)`
+\                   ``square(x)``         :func:`square(x)`
+
+**Special mathematical functions**
+-------------------------------------------------------------------------------
+``erf(x)``                                :func:`erf(x)`
+``erfc(x)``                               :func:`erfc(x)`
+``gamma(x)``                              :func:`gamma(x)`
+\                   ``heaviside(x)``
+\                   ``i0(x)``
+``lgamma(x)``                             :func:`lgamma(x)`
+\                   ``sinc(x)``
+
+**Floating-point functions**
+-------------------------------------------------------------------------------
+``abs(x)``          ``abs(x)``            :func:`abs(x)`
+``ceil(x)``         ``ceil(x)``           :func:`ceil(x)`
+``copysign(x, y)``  ``copysign(x, y)``    :func:`copysign(x, y)`
+``fabs(x)``         ``fabs(x)``           :func:`fabs(x)`
+``floor(x)``        ``floor(x)``          :func:`floor(x)`
+``fmod(x, y)``      ``fmod(x, y)``        :func:`fmod(x)`
+``frexp(x)``        ``frexp(x)``
+``isclose(x, y)``   ``isclose(x, y)``     :func:`isclose(x, y)`
+``isfinite(x)``     ``isfinite(x)``       :func:`isfinite(x)`
+``isinf(x)``        ``isinf(x)``          :func:`isinf(x)`
+``isnan(x)``        ``isnan(x)``          :func:`isna(x)`
+``ldexp(x, n)``     ``ldexp(x, n)``       :func:`ldexp(x, n)`
+``modf(x)``         ``modf(x)``
+\                   ``nextafter(x, y)``
+\                   ``rint(x)``           :func:`rint(x)`
+``round(x)``        ``round(x)``          :func:`round(x)`
+\                   ``sign(x)``           :func:`sign(x)`
+\                   ``signbit(x)``        :func:`signbit(x)`
+\                   ``spacing(x)``
+``trunc(x)``        ``trunc(x)``          :func:`trunc(x)`
+
+**Miscellaneous**
+-------------------------------------------------------------------------------
+\                   ``clip(x, a, b)``
+``comb(n, k)``
+\                   ``divmod(x, y)``
+``factorial(n)``
+``gcd(a, b)``       ``gcd(a, b)``
+\                   ``maximum(x, y)``
+\                   ``minimum(x, y)``
+
+**Mathematical constants**
+-------------------------------------------------------------------------------
+``e``               ``e``                 :data:`e`
+\                   \                     :data:`golden`
+``inf``             ``inf``               :data:`inf`
+``nan``             ``nan``               :data:`nan`
+``pi``              ``pi``                :data:`pi`
+``tau``                                   :data:`tau`
+==================  ====================  =====================================
+
 .. _`numpy math functions`: https://docs.scipy.org/doc/numpy-1.13.0/reference/routines.math.html
-.. _`true circle constant`: https://hexnet.org/files/documents/tau-manifesto.pdf
+
+
+
+.. toctree::
+    :hidden:
+
+    abs()        <math/abs>
+    arccos()     <math/arccos>
+    arcosh()     <math/arcosh>
+    arcsin()     <math/arcsin>
+    arctan()     <math/arctan>
+    arsinh()     <math/arsinh>
+    artanh()     <math/artanh>
+    atan2()      <math/atan2>
+    cbrt()       <math/cbrt>
+    ceil()       <math/ceil>
+    copysign()   <math/copysign>
+    cos()        <math/cos>
+    cosh()       <math/cosh>
+    deg2rad()    <math/deg2rad>
+    e            <math/e>
+    erf(x)       <math/erf>
+    erfc(x)      <math/erfc>
+    exp(x)       <math/exp>
+    exp2(x)      <math/exp2>
+    expm1(x)     <math/expm1>
+    fabs()       <math/fabs>
+    floor()      <math/floor>
+    fmod()       <math/fmod>
+    gamma()      <math/gamma>
+    golden       <math/golden>
+    hypot()      <math/hypot>
+    inf          <math/inf>
+    isclose()    <math/isclose>
+    isfinite()   <math/isfinite>
+    isinf()      <math/isinf>
+    isna()       <math/isna>
+    ldexp()      <math/ldexp>
+    lgamma()     <math/lgamma>
+    log()        <math/log>
+    log10()      <math/log10>
+    log1p()      <math/log1p>
+    log2()       <math/log2>
+    logaddexp()  <math/logaddexp>
+    logaddexp2() <math/logaddexp2>
+    nan          <math/nan>
+    pi           <math/pi>
+    pow()        <math/pow>
+    rad2deg()    <math/rad2deg>
+    rint()       <math/rint>
+    round()      <math/round>
+    sign()       <math/sign>
+    signbit()    <math/signbit>
+    sin()        <math/sin>
+    sinh()       <math/sinh>
+    sqrt()       <math/sqrt>
+    square()     <math/square>
+    tan()        <math/tan>
+    tanh()       <math/tanh>
+    tau          <math/tau>
+    trunc()      <math/trunc>

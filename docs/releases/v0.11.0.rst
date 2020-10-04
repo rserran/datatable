@@ -1,0 +1,300 @@
+
+
+.. changelog::
+  :version: 0.11.0
+  :released: 2020-09-19
+  :wheels: https://files.pythonhosted.org/packages/18/d3/c4edd8e4ceac998558a49ee0bbb8337c4e5ea7337874ec84425d24c0a407/datatable-0.11.0-cp35-cp35m-macosx_10_6_x86_64.whl
+           https://files.pythonhosted.org/packages/50/41/4ff398c2ec7ce4078e6a6c53759d96c0a8c3627b94a87fd84725a1015e63/datatable-0.11.0-cp35-cp35m-manylinux2010_x86_64.whl
+           https://files.pythonhosted.org/packages/4a/ac/ec5b668091e42069341ff981a53d701da98fb165b43e49618b3dbac52075/datatable-0.11.0-cp35-cp35m-manylinux2014_ppc64le.whl
+           https://files.pythonhosted.org/packages/53/ac/e28264e5c022a6b82582b17544e9dd0ed693ad9b2ba688880f9b79a9eb07/datatable-0.11.0-cp35-cp35m-win_amd64.whl
+           https://files.pythonhosted.org/packages/32/18/f846e1829137d1270c21a150d4b5595c33b5ac69f9ffd85bd8e6a9edd575/datatable-0.11.0-cp36-cp36m-macosx_10_9_x86_64.whl
+           https://files.pythonhosted.org/packages/80/07/7ca237758866497cbe076e31920a0320e28808f54fa75a5e2b0348d7aa8a/datatable-0.11.0-cp36-cp36m-manylinux2010_x86_64.whl
+           https://files.pythonhosted.org/packages/31/e9/83c68f6682d84dbb5a8a44f30c2eceee031ac323e9c4d27b1eb2774a8dc8/datatable-0.11.0-cp36-cp36m-manylinux2014_ppc64le.whl
+           https://files.pythonhosted.org/packages/50/6e/a5ab62db0613ce8e14dbfe53625a417a0714793774093cfe85f804bbc06c/datatable-0.11.0-cp36-cp36m-win_amd64.whl
+           https://files.pythonhosted.org/packages/87/4f/6b0daf9a58791658e0544928b3532d4d1c3c1f0822ce0fcc428d0284704c/datatable-0.11.0-cp37-cp37m-macosx_10_9_x86_64.whl
+           https://files.pythonhosted.org/packages/d3/3d/5b2ea70b0b9ff28373ca3b46c4fcc82599ad797ef13a368a704a65424f54/datatable-0.11.0-cp37-cp37m-manylinux2010_x86_64.whl
+           https://files.pythonhosted.org/packages/87/b1/72629bda96067d579712bf3146d09cc047fb45eaa39d45c55bced5b29b83/datatable-0.11.0-cp37-cp37m-manylinux2014_ppc64le.whl
+           https://files.pythonhosted.org/packages/99/61/3d08933e4e8bf73838ab88cf81fa3433f56305fb4cbca914a6f87a20c6f8/datatable-0.11.0-cp37-cp37m-win_amd64.whl
+           https://files.pythonhosted.org/packages/29/88/9816df2e80d1f3d46ab6db23ea9d33875b2678d60b8dced206862167ccab/datatable-0.11.0-cp38-cp38-macosx_10_9_x86_64.whl
+           https://files.pythonhosted.org/packages/bd/45/4acd6c270748e005cb98f7bbd6ab904b7ed072d920393fa3cf8afa288fb6/datatable-0.11.0-cp38-cp38-manylinux2010_x86_64.whl
+           https://files.pythonhosted.org/packages/92/d7/f89c441fa05dac62c33e078a2a735c1c2501611039ac7b6ed35211e5c7f7/datatable-0.11.0-cp38-cp38-manylinux2014_ppc64le.whl
+           https://files.pythonhosted.org/packages/45/cf/37ad8e57a5eb041f66caa067882f2ef5ee21479fea132cb3c7c4725745c5/datatable-0.11.0-cp38-cp38-win_amd64.whl
+           https://files.pythonhosted.org/packages/2e/6a/bba91ebcff851f7b650ddcf2783b997c7f9b4c2d46f7c90bd7e436396f99/datatable-0.11.0.tar.gz
+
+
+  Frame
+  -----
+  .. current-class:: datatable.Frame
+
+  -[new] Property :attr:`.source` contains the name of the file
+    where the frame was loaded from. If the frame was modified after loading,
+    or if it was created dynamically to begin with, this property will
+    return ``None``.
+
+  -[new] The expression :meth:`len(DT) <datatable.Frame.__len__>` now works,
+    and returns the number of columns in the Frame. This allows the Frame to
+    be used in contexts where an iterable might be expected.
+
+  -[new] Added ability to cast string columns into numeric types: int, float
+    or boolean. [#1313]
+
+  -[new] String columns now support comparison operators ``<``, ``>``, ``<=``
+    and ``>=``. [#2274]
+
+  -[new] String columns can now be added together, similarly to how strings
+    can be added in Python. [#1839]
+
+  -[new] Added a new function :func:`datatable.cut` to bin numeric data
+    to equal-width discrete intervals. [#2483]
+
+  -[new] Added a new function :func:`datatable.qcut` to bin data
+    to equal-population discrete intervals. [#1680]
+
+  -[new] Added function :func:`datatable.math.round` which is the
+    equivalent of Python's built-in ``round()``. [#2285]
+
+  -[enh] Method :meth:`.colindex()` now accepts a column selector
+    f-expression as an argument.
+
+  -[enh] When creating a Frame from a python list, it is now possible to
+    explicitly specify the stype of the resulting column by "dividing" the
+    list by the type you need::
+
+        dt.Frame(A=[1, 5, 10] / dt.int64,
+                 B=[0, 0, 0] / dt.float64)
+
+  -[enh] Added new argument ``bom=False`` to the :meth:`.to_csv()` method.
+    If set to ``True``, it will add the Byte-Order Mark (BOM) to the output
+    CSV file. [#2379]
+
+  -[enh] Casting a column into its own type is now a no-op. [#2425]
+
+  -[enh] It is now possible to create a Frame from a pandas DataFrame with
+    Categorical columns (which will be converted into strings). [#2407]
+
+  -[api] Method :meth:`.cbind()` now throws a
+    :exc:`dt.exceptions.InvalidOperationError`
+    instead of a ``ValueError`` if the argument frames have incompatible
+    shapes.
+
+  -[api] Method :meth:`.colindex()` now throws an :exc:`dt.exceptions.KeyError` when given
+    a column that doesn't exist in the frame, or an :exc:`dt.exceptions.IndexError` if
+    given a numeric column index outside of the allowed range. Previously it
+    was throwing a ``ValueError`` in both cases.
+
+  -[api] When creating a Frame from a list containing mixed integers/floats
+    and strings, the resulting Frame will now have stype ``str32``. Previously
+    an ``obj64`` column was created instead. The new behavior is more
+    consistent with fread's behavior when reading CSV files.
+
+  -[api] Expression ``f[:]`` now excludes groupby columns when used in a
+    groupby context. [#2460]
+
+  -[api] Parameters ``_strategy=`` in :meth:`.to_csv()` and :meth:`.to_jay()`
+    were renamed into ``method=``. The old parameter name still works, so this
+    change is not breaking.
+
+  -[api] The behaviour of a method :meth:`.sort()` is made consistent with
+    the function :func:`dt.sort()`. When the list of columns to sort
+    is empty, both will not sort any columns.
+
+  -[fix] Deleting a key from the Frame (``del DT.key``) no longer causes a
+    seg.fault. [#2357]
+
+  -[fix] Casting a 0-row ``str32`` column into ``str64`` stype no longer goes
+    into an infinite loop. [#2369]
+
+  -[fix] Fixed creation of a ``str64`` column from a python list of strings
+    when the total size of all strings is greater than 2GB. [#2368]
+
+  -[fix] Rbinding several ``str32`` columns such that their combined string
+    buffers have size over 2GB now properly creates a ``str64`` column as a
+    result. [#2367]
+
+  -[fix] Fixed crash when writing to CSV a frame with many boolean columns
+    when the option ``quoting="all"`` is used. [#2382]
+
+  -[fix] It is no longer allowed to combine ``compression="gzip"`` and
+    ``append=True`` in :meth:`.to_csv()`.
+
+  -[fix] Empty strings no longer get confused with NA strings in
+    :meth:`.replace()`. [#2502]
+
+  -[fix] :func:`dt.rbind()`-ing an iterator of frames created on-the-fly
+    no longer produces an undefined behavior. [#2621]
+
+
+  Fread
+  -----
+  .. current-module:: datatable
+
+  -[new] Added new function :func:`iread()`, which is similar to
+    :func:`fread()`, but suitable for reading multiple sources at once. The
+    function will return an iterator of Frames.
+
+    Use this function to read multiple files using a glob, or give it a list
+    of files, or an archive containing multiple files inside, or an Excel
+    file with multiple sheets, etc.
+
+    The function :func:`iread()` has parameter ``errors=`` which controls
+    what shouold happen when some of the sources cannot be read. Possible
+    values are: ``"warn"``, ``"raise"``, ``"ignore"`` and ``"store"``. The
+    latter will catch the exceptions that may occur when reading each
+    input, and return those exception objects within the iterator. [#2008]
+
+  -[new] It is now possible to read multi-file ``.tar.gz`` files using
+    :func:`iread()`. [#2392]
+
+  -[new] Added parameter ``encoding`` which will force fread to decode the
+    input using the specified encoding before attempting to read it. The
+    decoding process uses standard python codecs, and is therefore
+    single-threaded. The parameter accepts any value available via the standard
+    python library ``codecs``. [#2395]
+
+  -[new] Added parameter ``memory_limit`` which instructs fread to try to limit
+    the amount of memory used when reading the input. This parameter is
+    especially useful when reading files that are larger than the amount of
+    available memory. [#1750]
+
+  -[enh] Added parameter ``multiple_sources`` which controls fread's
+    behavior when multiple input sources are detected (for example, if you
+    pass a name of an archive, and the archive contains multiple files).
+    Possible values are: ``"warn"`` (default), ``"error"``, and ``"ignore"``.
+
+  -[enh] Fread now displays a progress bar when downloading data from a URL.
+    [#2441]
+
+  -[enh] Fread now computes NA counts of all data while reading, storing
+    them in per-column stats. For integer and floating point columns we also
+    compute min/max value in each column. [#1097]
+
+  -[enh] When reading from a URL, fread will now escape url-unsafe characters
+    in that URL, so that the user doesn't have to.
+
+  -[fix] When reading Excel files, the cells with datetime or boolean types
+    are now handled correctly, in particular a datetime value is converted
+    into its string representation. [#1701]
+
+  -[fix] Fread now properly detects ``\r``-newlines in the presence of fields
+    with quoted ``\n``-newlines. [#1343]
+
+  -[fix] Opening Jay file from a bytes object now produces a Frame that
+    remains valid even after the bytes object is deleted. [#2547]
+
+  -[api] Function :func:`fread()` now always returns a single Frame object;
+    previously it could return a dict of Frames if multiple sources were
+    detected. Use :func:`iread()` if you need to read multi-source input.
+
+
+  General
+  -------
+
+  -[new] datatable is now fully supported on Windows.
+
+  -[new] Added exception :exc:`InvalidOperationError`, which can be used to
+    signal when an operation is requested that would be illegal for the given
+    combination of parameters.
+
+  -[new] New option ``dt.options.debug.enabled`` will report all calls to the
+    internal C++ core functions, together with their timings. This may help
+    identify performance bottlenecks, or help troubleshooting user scripts.
+
+    Additional options ``debug.logger``, ``debug.report_args`` and
+    ``debug.max_arg_size`` allow more granular control over the logging
+    process. [#2452]
+
+  -[new] Function ``ifelse(cond, expr_if_true, expr_if_false)`` can return
+    one of the two values based on the condition. [#2411] ::
+
+        DT["max(x,y)"] = ifelse(f.x >= f.y, f.x, f.y)
+
+  -[enh] datatable no longer has modules ``blessed`` and ``typesentry`` as
+    dependencies. [#1677] [#1535]
+
+  -[enh] Added 2 new fields into the :data:`dt.build_info` struct: ``.git_date``
+    is the UTC timestamp of the git revision from which that version of
+    datatable was built, and ``.git_diff`` which will be non-empty for builds
+    from code that was modified compared to the git revision they are based on.
+
+  -[enh] During a fork the thread pool will now shut down completely, together
+    with the monitor thread. The threads will then restart in both the parent
+    and the child, when needed. [#2438]
+
+  -[fix] Internal function :func:`dt.internal.frame_column_data_r`
+    now works properly with virtual columns. [#2269]
+
+  -[fix] Avoid rare deadlock when creating a frame from pandas DataFrame in
+    a forked process, in the datatable compiled with gcc version before 7.0.
+    [#2272]
+
+  -[fix] Fix rare crash in the interrupt signal handler. [#2282]
+
+  -[fix] Fixed possible crash in :func:`rbind()` and :func:`union()` when
+    they were called with a string argument, or with an object that caused
+    infinite recursion. [#2386]
+
+  -[fix] Column names containing backticks now display properly in error
+    messages. [#2406]
+
+  -[fix] Fixed rare race condition when multiple threads tried to throw an
+    exception at the same time. [#2526]
+
+  -[api] All exceptions thrown by datatable are now declared in the
+    :mod:`datatable.exceptions` module. These exceptions are now organized to
+    derive from the common base class :exc:`dt.exceptions.DtException`.
+
+    The exception messages when stringified no longer contain backticks. The
+    backticks are still emitted internally to help display the error in a
+    color-supporting terminal, but when the exception is converted into a
+    string via ``str()`` or ``repr()``, these backticks will now be stripped.
+    This change ensures that the exception message remains the same regardless
+    of how it is rendered.
+
+
+  FTRL model
+  ----------
+  .. current-class:: datatable.models.Ftrl
+
+  -[enh] :attr:`.nepochs`, the number of epochs to train the model, can now
+    be a float rather than an integer.
+
+  -[enh] :meth:`.fit()` now throws :exc:`dt.exceptions.TypeError` when ltypes in the
+   training and validation frames are not consistent.
+
+  -[api] :attr:`.interactions` now throws an :exc:`dt.exceptions.ValueError`
+    instead of a :exc:`dt.exceptions.TypeError` when assigning interactions
+    having zero features.
+
+  -[fix] Fixed inconsistency in progress reporting. [#2520]
+
+
+  .. contributors::
+
+    176 @st-pasha
+    62  @oleksiyskononenko
+    7   @samukweku           <Samuel Oranyeli>
+    4   @pradkrish           <Pradeep Krishnamurthy>
+    1   @chi2liu             <Liu Chi>
+    1   @wesnm               <Wes Morgan>
+    1   @jfaccioni           <Juliano Faccioni>
+    1   @mmalohlava
+    1   @bboe                <Bryce Boe>
+    --
+    50  @st-pasha
+    15  @oleksiyskononenko
+    10  @arnocandel
+    3   @samukweku
+    3   @pseudotensor
+    3   @myamullaciencia     <Mallesham Yamulla>
+    2   @navdeep-G           <Navdeep Gill>
+    1   @ben519              <Ben Gorman>
+    1   @surenH2oai          <Suren Mohanathas>
+    1   @tdhock              <Toby Dylan Hocking>
+    1   @ashrith             <Ashrith Barthur>
+    1   @javadba
+    1   @jangorecki
+    1   @timothy-salazar     <Timothy Salazar>
+    1   @mmalohlava
+    1   @XiaomoWu
+    1   @Viktor-Demin
+    1   @chrinide            <Chrinide>

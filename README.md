@@ -1,5 +1,5 @@
 <!---
-  Copyright 2018 H2O.ai
+  Copyright 2018-2020 H2O.ai
 
   Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),
@@ -23,8 +23,8 @@
 # datatable
 
 [![PyPi version](https://img.shields.io/pypi/v/datatable.svg)](https://pypi.org/project/datatable/)
-[![License](https://img.shields.io/pypi/l/datatable.svg)](https://github.com/h2oai/datatable/blob/master/LICENSE)
-[![Build Status](https://travis-ci.org/h2oai/datatable.svg?branch=master)](https://travis-ci.org/h2oai/datatable)
+[![License](https://img.shields.io/pypi/l/datatable.svg)](https://github.com/h2oai/datatable/blob/main/LICENSE)
+[![Build Status](https://travis-ci.org/h2oai/datatable.svg?branch=main)](https://travis-ci.org/h2oai/datatable)
 [![Documentation Status](https://readthedocs.org/projects/datatable/badge/?version=latest)](https://datatable.readthedocs.io/en/latest/?badge=latest)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e72cadff26ed4ad68decd61b66b4c563)](https://www.codacy.com/app/st-pasha/datatable?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=h2oai/datatable&amp;utm_campaign=Badge_Grade)
 
@@ -34,9 +34,8 @@ put specific emphasis on speed and big data support. As the name suggests, the
 package is closely related to R's [data.table][] and attempts to mimic its core
 algorithms and API.
 
-Currently `datatable` is in the Alpha stage and is undergoing active
-development. The API may be unstable; some of the core features are incomplete
-and/or missing. Python 3.5+ is required.
+Currently `datatable` is in the Beta stage and undergoing active development.
+Some of the features may still be missing. Python 3.6+ is required.
 
 
 ## Project goals
@@ -91,23 +90,14 @@ the following:
 * Interoperability with pandas / numpy / pure python: the users should have
   the ability to convert to another data-processing framework with ease.
 
-* Restrictions: Python 3.5+, 64-bit systems only.
+* Restrictions: Python 3.6+, 64-bit systems only.
 
 
 ## Installation
 
-On MacOS systems installing datatable is as easy as
+On macOS, Linux and Windows systems installing datatable is as easy as
 ```sh
 pip install datatable
-```
-
-On Linux you can install a binary distribution as
-```sh
-# If you have Python 3.5
-pip install https://s3.amazonaws.com/h2o-release/datatable/stable/datatable-0.8.0/datatable-0.8.0-cp35-cp35m-linux_x86_64.whl
-
-# If you have Python 3.6
-pip install https://s3.amazonaws.com/h2o-release/datatable/stable/datatable-0.8.0/datatable-0.8.0-cp36-cp36m-linux_x86_64.whl
 ```
 
 On all other platforms a source distribution will be needed. For more
@@ -117,7 +107,6 @@ information see [Build instructions](https://datatable.readthedocs.io/en/latest/
 ## See also
 
 * [Build instructions](https://datatable.readthedocs.io/en/latest/install.html)
-* [Changelog](https://github.com/h2oai/datatable/blob/master/CHANGELOG.md)
 * [Documentation](https://datatable.readthedocs.io/en/latest/?badge=latest)
 
 

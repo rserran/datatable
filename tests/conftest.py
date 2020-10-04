@@ -9,9 +9,10 @@
 #-------------------------------------------------------------------------------
 import datatable as dt
 import os
-import sys
 import pytest
 import shutil
+import sys
+import platform
 import tempfile as mod_tempfile
 import warnings
 
@@ -19,32 +20,42 @@ import warnings
 @pytest.fixture(autouse=True, scope="session")
 def setup():
     """This fixture will be run once only."""
-    assert sys.version_info >= (3, 5), "Python version 3.5+ is required"
+    assert sys.version_info >= (3, 6), "Python version 3.6+ is required"
     dt.options.progress.enabled = False
 
 
-@pytest.fixture(scope="session")
-def py36():
-    """Skip the test when run under Python 3.5.x"""
-    if sys.version_info < (3, 6):
-        pytest.skip("Python3.6+ is required")
+def is_ppc64():
+    """Helper function to determine ppc64 platform"""
+    platform_hardware = [platform.machine(), platform.processor()]
+    return platform.system() == "Linux" and "ppc64le" in platform_hardware
 
 
 @pytest.fixture(scope="session")
 def noppc64():
-    """
-    Skip the test if running in PowerPC64 or Python 3.5.
-
-    The reason we include Python3.6 requirement is because in Python 3.5 it
-    is not possible to determine whether the platform is PPC64 or not. Or at
-    least I don't know how... sys.platform is "linux", and
-    sys.implementation.cache_tag is "cpython-35".
-    """
-    if sys.version_info < (3, 6):
-        pytest.skip("Python3.6+ is required")
-    impl = str(sys.implementation)
-    if "powerpc64" in impl or "ppc64le" in impl:
+    """ Skip the test if running in PowerPC64 """
+    if is_ppc64():
         pytest.skip("Disabled on PowerPC64 platform")
+
+
+@pytest.fixture(scope="session")
+def nowin():
+    """Skip this test when running on Windows"""
+    if platform.system() == "Windows":
+        pytest.skip("Disabled on Windows")
+
+
+@pytest.fixture(scope="session")
+def tol():
+    """
+    This fixture returns a tolerance to compare floats on a particular platform.
+    The reason we need this fixture are some platforms that don't have a proper
+    long double type, resulting in a loss of precision when fread converts
+    double literals into double numbers.
+    """
+    platform_tols = {"Windows": 1e-15, "PowerPC64": 1e-16}
+    platform_system = "PowerPC64" if is_ppc64() else platform.system()
+
+    return platform_tols.get(platform_system, 0)
 
 
 @pytest.fixture(scope="session")
@@ -103,7 +114,17 @@ def tempfile():
     fd, fname = mod_tempfile.mkstemp()
     os.close(fd)
     yield fname
-    os.unlink(fname)
+    if os.path.exists(fname):
+        os.unlink(fname)
+
+
+@pytest.fixture(scope="function")
+def tempfile_jay():
+    fd, fname = mod_tempfile.mkstemp(suffix=".jay")
+    os.close(fd)
+    yield fname
+    if os.path.exists(fname):
+        os.unlink(fname)
 
 
 @pytest.fixture(scope="function")
@@ -111,3 +132,10 @@ def tempdir():
     dirname = mod_tempfile.mkdtemp()
     yield dirname
     shutil.rmtree(dirname, ignore_errors=True)
+
+
+# Without this fixture, get_core_tests() does not work properly...
+@pytest.fixture()
+def testname(request):
+    return request.param()
+
