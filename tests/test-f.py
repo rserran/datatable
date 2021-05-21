@@ -89,14 +89,14 @@ def test_f_col_selector_invalid():
     with pytest.raises(TypeError) as e:
         noop(f[2.5])
     assert str(e.value) == ("Column selector should be an integer, string, or "
-                            "slice, not <class 'float'>")
+                            "slice, or list/tuple, not <class 'float'>")
     # Note: at some point we may start supporting all the expressions below:
     with pytest.raises(TypeError):
-        noop(f[[7, 4]])
-    with pytest.raises(TypeError):
-        noop(f[("A", "B", "C")])
-    with pytest.raises(TypeError):
         noop(f[lambda: 1])
+
+def test_f_col_selector_list_tuple():
+    assert str(f[[7, 4]]) == "FExpr<f[[7, 4]]>"
+    assert str(f[("A", "B", "C")]) == "FExpr<f[['A', 'B', 'C']]>"
 
 
 def test_f_expressions():
@@ -120,6 +120,9 @@ def test_f_columnset_str():
     assert str(f[dt.int32]) == "FExpr<f[stype.int32]>"
     assert str(f[dt.float64]) == "FExpr<f[stype.float64]>"
     assert str(f[dt.ltype.int]) == "FExpr<f[ltype.int]>"
+    assert str(f[int, float]) == "FExpr<f[[int, float]]>"
+    assert str(f[dt.int32, dt.float64, dt.str32]) == \
+        "FExpr<f[[stype.int32, stype.float64, stype.str32]]>"
 
 
 def test_f_columnset_extend():
@@ -127,11 +130,15 @@ def test_f_columnset_extend():
         "Expr:setplus(FExpr<f[:]>, FExpr<f.A>; )"
     assert str(f[int].extend(f[str])) == \
         "Expr:setplus(FExpr<f[int]>, FExpr<f[str]>; )"
+    assert str(f.A.extend(f['B','C'])) == \
+        "Expr:setplus(FExpr<f.A>, FExpr<f[['B', 'C']]>; )"
 
 
 def test_f_columnset_remove():
     assert str(f[:].remove(f.A)) == "Expr:setminus(FExpr<f[:]>, FExpr<f.A>; )"
     assert str(f[int].remove(f[0])) == "Expr:setminus(FExpr<f[int]>, FExpr<f[0]>; )"
+    assert str(f.A.remove(f['B','C'])) == \
+        "Expr:setminus(FExpr<f.A>, FExpr<f[['B', 'C']]>; )"
 
 
 
@@ -199,6 +206,7 @@ def test_f_columnset_ltypes(DT):
 def test_columnset_sum(DT):
     assert_equals(DT[:, f[int].extend(f[float])], DT[:, [int, float]])
     assert_equals(DT[:, f[:3].extend(f[-3:])], DT[:, [0, 1, 2, -3, -2, -1]])
+    assert_equals( DT[:, f['A','B','C'].extend(f['E','F', 'G'])], DT[:, [0, 1, 2, -3, -2, -1]])
     assert_equals(DT[:, f.A.extend(f.B)], DT[:, ['A', 'B']])
     assert_equals(DT[:, f[:].extend({"extra": f.A + f.C})],
                   dt.cbind(DT, DT[:, {"extra": f.A + f.C}]))
@@ -210,3 +218,120 @@ def test_columnset_diff(DT):
     assert_equals(DT[:, f[:5].remove(f[int])], DT[:, [1, 3]])
     assert_equals(DT[:, f[:].remove(f[100:])], DT)
     assert_equals(DT[:, f[:].remove(f["F":])], DT[:, :"E"])
+
+
+
+#-------------------------------------------------------------------------------
+# Misc methods
+#-------------------------------------------------------------------------------
+
+def test_sum():
+    assert str(dt.sum(f.A)) == str(f.A.sum())
+    assert str(dt.sum(f[:])) == str(f[:].sum())
+    DT = dt.Frame(A=range(1, 10))
+    assert_equals(DT[:, f.A.sum()], DT[:, dt.sum(f.A)])
+
+def test_max():
+    assert str(dt.max(f.A)) == str(f.A.max())
+    assert str(dt.max(f[:])) == str(f[:].max())
+    DT = dt.Frame(A=range(1, 10))
+    assert_equals(DT[:, f.A.max()], DT[:, dt.max(f.A)])
+
+def test_mean():
+    assert str(dt.mean(f.A)) == str(f.A.mean())
+    assert str(dt.mean(f[:])) == str(f[:].mean())
+    DT = dt.Frame(A=range(1, 10))
+    assert_equals(DT[:, f.A.mean()], DT[:, dt.mean(f.A)])
+
+def test_median():
+    assert str(dt.median(f.A)) == str(f.A.median())
+    assert str(dt.median(f[:])) == str(f[:].median())
+    DT = dt.Frame(A=[2, 3, 5, 5, 9, -1, 2.2])
+    assert_equals(DT[:, f.A.median()], DT[:, dt.median(f.A)])
+
+def test_min():
+    assert str(dt.min(f.A)) == str(f.A.min())
+    assert str(dt.min(f[:])) == str(f[:].min())
+    DT = dt.Frame(A=[2, 3, 5, 5, 9, -1, 2.2])
+    assert_equals(DT[:, f.A.min()], DT[:, dt.min(f.A)])
+def test_rowall():
+    assert str(dt.rowall(f.A)) == str(f.A.rowall())
+    assert str(dt.rowall(f[:])) == str(f[:].rowall())
+    DT = dt.Frame({'A': [True, True], 'B': [True, False]})
+    assert_equals(DT[:, f[:].rowall()], DT[:, dt.rowall(f[:])])
+
+def test_rowany():
+    assert str(dt.rowany(f.A)) == str(f.A.rowany())
+    assert str(dt.rowany(f[:])) == str(f[:].rowany())
+    DT = dt.Frame({'A': [True, True], 'B': [True, False]})
+    assert_equals(DT[:, f[:].rowany()], DT[:, dt.rowany(f[:])])
+
+def test_rowfirst():
+    assert str(dt.rowfirst(f.A)) == str(f.A.rowfirst())
+    assert str(dt.rowfirst(f[:])) == str(f[:].rowfirst())
+    DT = dt.Frame({'A':[1, None, None, None],
+                   'B':[None, 3, 4, None],
+                   'C':[2, None, 5, None]})
+
+    assert_equals(DT[:, f[:].rowfirst()], DT[:, dt.rowfirst(f[:])])
+
+def test_rowlast():
+    assert str(dt.rowlast(f.A)) == str(f.A.rowlast())
+    assert str(dt.rowlast(f[:])) == str(f[:].rowlast())
+    DT = dt.Frame({'A':[1, None, None, None],
+                   'B':[None, 3, 4, None],
+                   'C':[2, None, 5, None]})
+
+    assert_equals(DT[:, f[:].rowlast()], DT[:, dt.rowlast(f[:])])
+
+def test_rowmax():
+    assert str(dt.rowmax(f.A)) == str(f.A.rowmax())
+    assert str(dt.rowmax(f[:])) == str(f[:].rowmax())
+    DT = dt.Frame({"C": [2, 5, 30, 20, 10],
+                   "D": [10, 8, 20, 20, 1]})
+
+    assert_equals(DT[:, f[:].rowmax()], DT[:, dt.rowmax(f[:])])
+
+
+def test_rowmin():
+    assert str(dt.rowmin(f.A)) == str(f.A.rowmin())
+    assert str(dt.rowmin(f[:])) == str(f[:].rowmin())
+    DT = dt.Frame({"C": [2, 5, 30, 20, 10],
+                   "D": [10, 8, 20, 20, 1]})
+
+    assert_equals(DT[:, f[:].rowmin()], DT[:, dt.rowmin(f[:])])
+
+
+def test_rowsum():
+    assert str(dt.rowsum(f.A)) == str(f.A.rowsum())
+    assert str(dt.rowsum(f[:])) == str(f[:].rowsum())
+    DT = dt.Frame({"C": [2, 5, 30, 20, 10],
+                   "D": [10, 8, 20, 20, 1]})
+
+    assert_equals(DT[:, f[:].rowsum()], DT[:, dt.rowsum(f[:])])
+
+
+def test_rowmean():
+    assert str(dt.rowmean(f.A)) == str(f.A.rowmean())
+    assert str(dt.rowmean(f[:])) == str(f[:].rowmean())
+    DT = dt.Frame({"C": [2, 5, 30, 20, 10],
+                   "D": [10, 8, 20, 20, 1]})
+
+    assert_equals(DT[:, f[:].rowmean()], DT[:, dt.rowmean(f[:])])
+
+def test_rowcount():
+    assert str(dt.rowcount(f.A)) == str(f.A.rowcount())
+    assert str(dt.rowcount(f[:])) == str(f[:].rowcount())
+    DT = dt.Frame({"C": [2, 5, 30, 20, 10],
+                   "D": [10, 8, 20, 20, 1]})
+
+    assert_equals(DT[:, f[:].rowcount()], DT[:, dt.rowcount(f[:])])
+
+def test_rowsd():
+    assert str(dt.rowsd(f.A)) == str(f.A.rowsd())
+    assert str(dt.rowsd(f[:])) == str(f[:].rowsd())
+    DT = dt.Frame({"C": [2, 5, 30, 20, 10],
+                   "D": [10, 8, 20, 20, 1]})
+
+    assert_equals(DT[:, f[:].rowsd()], DT[:, dt.rowsd(f[:])])
+

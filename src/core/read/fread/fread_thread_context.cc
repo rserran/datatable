@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright 2018-2020 H2O.ai
+// Copyright 2018-2021 H2O.ai
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -23,6 +23,7 @@
 #include "csv/reader_fread.h"      // FreadReader
 #include "read/fread/fread_thread_context.h"
 #include "read/parallel_reader.h"  // ChunkCoordinates
+#include "read/parsers/ptype_iterator.h"     // PTypeIterator
 #include "utils/misc.h"            // wallclock
 #include "encodings.h"             // check_escaped_string, decode_escaped_csv_string
 #include "py_encodings.h"          // decode_win1252
@@ -36,7 +37,7 @@ FreadThreadContext::FreadThreadContext(
   ) : ThreadContext(bcols, brows, f.preframe),
       global_types_(types),
       freader(f),
-      parsers(ParserLibrary::get_parser_fns())
+      parsers(parser_functions)
 {
   parse_ctx_ = f.makeTokenizer();
   parse_ctx_.target = tbuf.data();
@@ -98,7 +99,8 @@ void FreadThreadContext::read_chunk(
         tch++;
         j++;
       }
-      //*** END HOT. START TEPID ***//
+
+      const char* fieldEnd = tch;
       if (tch == tlineStart) {
         parse_ctx_.skip_whitespace_at_line_start();
         if (tch == parse_ctx_.eof) break;  // empty last line
@@ -109,13 +111,14 @@ void FreadThreadContext::read_chunk(
         parse_ctx_.target ++;
         j++;
         if (j==ncols) { used_nrows++; continue; }  // next line
-        tch--;
+        // TODO: fill the rest of the fields with NAs explicitly, without
+        //       going through type-bumping process below
+        tch = fieldEnd;
       }
       else {
         tch = fieldStart;
       }
     }
-    //*** END TEPID. NOW COLD.
 
     if (sep==' ') {
       while (tch < parse_ctx_.eof && *tch==' ') tch++;
@@ -127,13 +130,13 @@ void FreadThreadContext::read_chunk(
       while (j < ncols) {
         fieldStart = tch;
         // auto ptype_iter = preframe_.column(j).get_ptype_iterator(&parse_ctx_.quoteRule);
-        PtypeIterator ptype_iter(types[j], preframe_.column(j).get_rtype(),
+        PTypeIterator ptype_iter(types[j], preframe_.column(j).get_rtype(),
                                  &parse_ctx_.quoteRule);
 
         while (true) {
           tch = fieldStart;
           bool quoted = false;
-          if (!ParserLibrary::info(*ptype_iter).isstring()) {
+          if (!parser_infos[*ptype_iter].type().is_string()) {
             parse_ctx_.skip_whitespace();
             const char* afterSpace = tch;
             tch = parse_ctx_.end_NA_string(tch);

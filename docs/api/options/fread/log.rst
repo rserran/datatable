@@ -1,5 +1,6 @@
 
-.. xdata:: datatable.options.fread.log
+.. xclass:: datatable.options.fread.log
+    :qual-type: class
     :src: --
 
     This property controls the following logging options:
@@ -9,10 +10,10 @@
         :class: api-table
 
         * - :attr:`.anonymize <datatable.options.fread.log.anonymize>`
-          - Switch that controls if the logs should be anonymized.
+          - Option that controls logs anonymization.
 
         * - :attr:`.escape_unicode <datatable.options.fread.log.escape_unicode>`
-          - Switch that controls if the unicode characters should be escaped.
+          - Option that controls escaping of the unicode characters.
 
 
 .. toctree::

@@ -46,10 +46,10 @@ static umaker_ptr _resolve_hyp(SType stype, const char* name,
     return umaker_ptr(new umaker_copy());
   }
   if (stype == SType::FLOAT64) {
-    return umaker1<double, double>::make(fn64, SType::VOID, SType::FLOAT64);
+    return umaker1<double, double>::make(fn64, SType::AUTO, SType::FLOAT64);
   }
   if (stype == SType::FLOAT32) {
-    return umaker1<float, float>::make(fn32, SType::VOID, SType::FLOAT32);
+    return umaker1<float, float>::make(fn32, SType::AUTO, SType::FLOAT32);
   }
   if (stype == SType::BOOL || stype_to_ltype(stype) == LType::INT) {
     return umaker1<double, double>::make(fn64, SType::FLOAT64, SType::FLOAT64);
@@ -211,7 +211,7 @@ R"(artanh(x)
 
 The inverse hyperbolic tangent of `x`.
 
-This function satisfies the property that ``sinh(arcsinh(x)) == x``.
+This function satisfies the property that ``tanh(artanh(x)) == x``.
 Alternatively, this function can also be computed as
 :math:`\tanh^{-1}(x) = \frac12\ln\frac{1+x}{1-x}`.
 

@@ -1,6 +1,4 @@
 
-.. py:module:: datatable
-
 .. xpy:module:: datatable
 
 
@@ -18,14 +16,22 @@ Submodules
     :widths: auto
     :class: api-table
 
+    * - :mod:`exceptions. <datatable.exceptions>`
+      - ``datatable`` warnings and exceptions.
+
+    * - :mod:`internal. <datatable.internal>`
+      - Access to some internal details of ``datatable`` module.
+
     * - :mod:`math. <datatable.math>`
       - Mathematical functions, similar to python's :mod:`math` module.
 
     * - :mod:`models. <datatable.models>`
       - A small set of data analysis tools.
 
-    * - :mod:`internal. <datatable.internal>`
-      - Access to some internal details of :mod:`datatable` module.
+    * - :mod:`time. <datatable.time>`
+      - Functions for working with date/time columns.
+
+
 
 
 Classes
@@ -45,12 +51,14 @@ Classes
     * - :class:`Namespace`
       - Helper class for addressing columns in a frame.
 
+    * - :class:`Type`
+      - Column's type, similar to numpy's ``dtype``.
+
     * - :class:`stype`
-      - Enum of column "storage" types, analogous to numpy's ``dtype``.
+      - [DEPRECATED] Enum of column "storage" types.
 
     * - :class:`ltype`
-      - Enum of column "logical" types, similar to standard Python notion
-        of a ``type``.
+      - [DEPRECATED] Enum of column "logical" types.
 
 
 Functions
@@ -88,6 +96,8 @@ Functions
       - Concatenate frame by rows
     * -
       -
+    * - :func:`as_type()`
+      - Cast column into another type
     * - :func:`ifelse()`
       - Ternary if operator
     * - :func:`shift()`
@@ -165,10 +175,10 @@ Other
     :class: api-table
 
     * - :data:`build_info`
-      - Information about the build of the datatable module.
+      - Information about the build of the ``datatable`` module.
 
     * - :data:`dt`
-      - The datatable module.
+      - The ``datatable`` module itself.
 
     * - :data:`f`
       - The primary namespace used during :meth:`DT[...] <dt.Frame.__getitem__>` call.
@@ -176,23 +186,27 @@ Other
     * - :data:`g`
       - Secondary namespace used during :meth:`DT[..., join()] <dt.Frame.__getitem__>` call.
 
-    * - :data:`options`
-      - datatable options.
+    * - :class:`options`
+      - ``datatable`` options.
 
 
 
 .. toctree::
     :hidden:
 
+    exceptions.       <exceptions>
     internal.         <internal>
     math.             <math>
     models.           <models>
     options.          <options>
+    time.             <time>
     FExpr             <fexpr>
     Frame             <frame>
     ltype             <ltype>
     Namespace         <namespace>
     stype             <stype>
+    Type              <type>
+    as_type()         <dt/as_type>
     build_info        <dt/build_info>
     by()              <dt/by>
     cbind()           <dt/cbind>
@@ -205,8 +219,8 @@ Other
     first()           <dt/first>
     fread()           <dt/fread>
     g                 <dt/g>
-    init_styles()     <dt/init_styles>
     ifelse()          <dt/ifelse>
+    init_styles()     <dt/init_styles>
     intersect()       <dt/intersect>
     iread()           <dt/iread>
     join()            <dt/join>
@@ -216,6 +230,8 @@ Other
     median()          <dt/median>
     min()             <dt/min>
     qcut()            <dt/qcut>
+    rbind()           <dt/rbind>
+    repeat()          <dt/repeat>
     rowall()          <dt/rowall>
     rowany()          <dt/rowany>
     rowcount()        <dt/rowcount>
@@ -226,15 +242,13 @@ Other
     rowmin()          <dt/rowmin>
     rowsd()           <dt/rowsd>
     rowsum()          <dt/rowsum>
-    rbind()           <dt/rbind>
-    repeat()          <dt/repeat>
     sd()              <dt/sd>
     setdiff()         <dt/setdiff>
     shift()           <dt/shift>
     sort()            <dt/sort>
     split_into_nhot() <dt/split_into_nhot>
-    symdiff()         <dt/symdiff>
     sum()             <dt/sum>
+    symdiff()         <dt/symdiff>
     union()           <dt/union>
     unique()          <dt/unique>
     update()          <dt/update>

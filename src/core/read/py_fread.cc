@@ -146,7 +146,7 @@ skip_to_line: int
     used together with `skip_to_string`.
 
 skip_blank_lines: bool
-    If `True` then any empty lines in the input will be skipped. If
+    If `True`, then any empty lines in the input will be skipped. If
     this parameter is `False` then: (a) in single-column mode empty
     lines are kept as empty lines; otherwise (b) if `fill=True` then
     empty lines produce a single line filled with NAs in the output;
@@ -184,7 +184,7 @@ logger: object
 
 multiple_sources: "warn" | "error" | "ignore"
     Action that should be taken when the input resolves to multiple
-    distinct sources. By default (`"warn"`) a warning will be issued
+    distinct sources. By default, (`"warn"`) a warning will be issued
     and only the first source will be read and returned as a Frame.
     The `"ignore"` action is similar, except that the extra sources
     will be discarded without a warning. Lastly, an :exc:`dt.exceptions.IOError`
@@ -214,8 +214,9 @@ memory_limit: int
 return: Frame
     A single :class:`Frame` object is always returned.
 
-    .. versionchanged:: 0.11.0
-        Previously a ``dict`` of Frames was returned when multiple
+    .. x-version-changed:: 0.11.0
+
+        Previously, a ``dict`` of Frames was returned when multiple
         input sources were provided.
 
 except: dt.exceptions.IOError
@@ -223,6 +224,9 @@ except: dt.exceptions.IOError
 See Also
 --------
 - :func:`iread()`
+
+- :ref:`Fread Examples` user guide for usage examples.
+
 
 )";
 

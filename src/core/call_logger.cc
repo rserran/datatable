@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright 2020 H2O.ai
+// Copyright 2020-2021 H2O.ai
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -91,97 +91,166 @@ static constexpr size_t N_IMPLS = 10;
 
 static const char* doc_options_debug_enabled =
 R"(
-If `True`, all calls to datatable core functions will be logged,
-together with their timings.
+This option controls whether or not all the calls to the datatable core
+functions should be logged.
+
+
+Parameters
+----------
+return: bool
+    Current `enabled` value. Initially, this option is set to `False`.
+
+new_enabled: bool
+    New `enabled` value. If set to `True`, all the calls to the datatable
+    core functions will be logged along with their respective timings.
+
 )";
 
 static const char* doc_options_debug_logger =
 R"(
 The logger object used for reporting calls to datatable core
-functions. If `None`, then the default (built-in) logger will
-be used. This option has no effect if
+functions. This option has no effect if
 :attr:`debug.enabled <datatable.options.debug.enabled>` is `False`.
+
+Parameters
+----------
+return: object
+    Current `logger` value. Initially, this option is set to `None`,
+    meaning that the built-in logger should be used.
+
+new_logger: object
+    New `logger` value.
+
+except: TypeError
+    The exception is raised when `new_logger` is not an object
+    having a method `.debug(self, msg)`.
+
 )";
 
 static const char* doc_options_debug_report_args =
 R"(
-Controls whether log messages about function and method calls
-contain information about the arguments of those calls.
+This option controls whether log messages for the function
+and method calls should contain information about the arguments
+of those calls.
+
+Parameters
+----------
+return: bool
+    Current `report_args` value. Initially, this option is set to `False`.
+
+new_report_args: object
+    New `report_args` value.
+
 )";
 
 
 static const char* doc_options_debug_arg_max_size =
 R"(
-When the :attr:`debug.report_args <datatable.options.debug.report_args>` is
-`True`, this option will limit the display size of each argument in order
-to prevent potentially huge outputs. This option's value
-cannot be less than `10`.
+
+This option limits the display size of each argument in order
+to prevent potentially huge outputs. It has no effect,
+if :attr:`debug.report_args <datatable.options.debug.report_args>` is
+`False`.
+
+Parameters
+----------
+return: int
+    Current `arg_max_size` value. Initially, this option is set to `100`.
+
+new_arg_max_size: int
+    New `arg_max_size` value, should be non-negative.
+    If `new_arg_max_size < 10`, then `arg_max_size` will be set to `10`.
+
+except: TypeError
+    The exception is raised when `new_arg_max_size` is negative.
+
 )";
 
 
 static bool opt_report_args = false;
-static size_t opt_truncate_length = 100;
+static size_t opt_arg_max_size = 100;
+
+
+static py::oobj get_enabled() {
+  return py::obool(LOG_ENABLED);
+}
+
+static void set_enabled(const py::Arg& arg) {
+  bool value = arg.to_bool_strict();
+  if (value && !LOG_ENABLED) {
+    LOG->enable();
+    LOG_ENABLED = true;
+  }
+  if (!value && LOG_ENABLED) {
+    LOG->disable();
+    LOG_ENABLED = false;
+  }
+}
+
+
+static py::oobj get_logger() {
+  return LOG->get_pylogger(false);
+}
+
+static void set_logger(const py::Arg& arg) {
+  auto logger = arg.to_oobj();
+  if (logger.is_none()) {
+    LOG->use_pylogger(py::oobj());
+  }
+  else {
+    if (!logger.get_attrx("debug").is_callable()) {
+      throw TypeError()
+        << "Logger should be an object having a method .debug(self, msg)";
+    }
+    LOG->use_pylogger(logger);
+  }
+}
+
+
+static py::oobj get_report_args() {
+  return py::obool(opt_report_args);
+}
+
+static void set_report_args(const py::Arg& arg) {
+  opt_report_args = arg.to_bool_strict();
+}
+
+
+static py::oobj get_arg_max_size() {
+  return py::oint(opt_arg_max_size);
+}
+
+static void set_arg_max_size(const py::Arg& arg) {
+  opt_arg_max_size = std::max(arg.to_size_t(), size_t(10));
+}
+
 
 static void _init_options() {
   register_option(
     "debug.enabled",
-    [] {
-      return py::obool(LOG_ENABLED);
-    },
-    [](const py::Arg& arg) {
-      bool value = arg.to_bool_strict();
-      if (value && !LOG_ENABLED) {
-        LOG->enable();
-        LOG_ENABLED = true;
-      }
-      if (!value && LOG_ENABLED) {
-        LOG->disable();
-        LOG_ENABLED = false;
-      }
-    },
+    get_enabled,
+    set_enabled,
     doc_options_debug_enabled
   );
 
   register_option(
     "debug.logger",
-    [] {
-      return LOG->get_pylogger(false);
-    },
-    [](const py::Arg& arg) {
-      auto logger = arg.to_oobj();
-      if (logger.is_none()) {
-        LOG->use_pylogger(py::oobj());
-      }
-      else {
-        if (!logger.get_attrx("debug").is_callable()) {
-          throw TypeError()
-            << "Logger should be an object having a method .debug(self, msg)";
-        }
-        LOG->use_pylogger(logger);
-      }
-    },
+    get_logger,
+    set_logger,
     doc_options_debug_logger
   );
 
   register_option(
     "debug.report_args",
-    [] {
-      return py::obool(opt_report_args);
-    },
-    [](const py::Arg& arg) {
-      opt_report_args = arg.to_bool_strict();
-    },
+    get_report_args,
+    set_report_args,
     doc_options_debug_report_args
   );
 
   register_option(
     "debug.arg_max_size",
-    [] {
-      return py::oint(opt_truncate_length);
-    },
-    [](const py::Arg& arg) {
-      opt_truncate_length = std::max(arg.to_size_t(), size_t(10));
-    },
+    get_arg_max_size,
+    set_arg_max_size,
     doc_options_debug_arg_max_size
   );
 }
@@ -215,12 +284,12 @@ log::Message& log::Message::operator<<(const R& r) {
   }
   py::ostring repr = r.obj.safe_repr();
   auto strobj = repr.to_cstring();
-  if (strobj.size() <= opt_truncate_length) {
+  if (strobj.size() <= opt_arg_max_size) {
     auto len = static_cast<long>(strobj.size());
     out_.write(strobj.data(), len);
   } else {
-    auto len0 = static_cast<long>(opt_truncate_length * 3/5);
-    auto len1 = static_cast<long>(opt_truncate_length * 2/5 - 3);
+    auto len0 = static_cast<long>(opt_arg_max_size * 3/5);
+    auto len1 = static_cast<long>(opt_arg_max_size * 2/5 - 3);
     out_.write(strobj.data(), len0);
     out_.write("...", 3);
     out_.write(strobj.end() - len1, len1);
@@ -279,6 +348,7 @@ class CallLogger::Impl
     void init_function  (const py::PKArgs* pkargs, py::robj args, py::robj kwds) noexcept;
     void init_function  (const py::XArgs* xargs, py::robj args, py::robj kwds) noexcept;
     void init_method    (const py::PKArgs* pkargs, py::robj obj, py::robj args, py::robj kwds) noexcept;
+    void init_method    (const py::XArgs* xargs, py::robj obj, py::robj args, py::robj kwds) noexcept;
     void init_dealloc   (py::robj obj) noexcept;
     void init_getset    (py::robj obj, py::robj val, void* closure) noexcept;
     void init_getattr   (py::robj obj, py::robj attr) noexcept;
@@ -286,6 +356,7 @@ class CallLogger::Impl
     void init_getbuffer (py::robj obj, void* buf, int flags) noexcept;
     void init_delbuffer (py::robj obj, void* buf) noexcept;
     void init_len       (py::robj obj) noexcept;
+    void init_hash      (py::robj obj) noexcept;
     void init_unaryfn   (py::robj obj, int op) noexcept;
     void init_binaryfn  (py::robj x, py::robj y, int op) noexcept;
     void init_ternaryfn (py::robj x, py::robj y, py::robj z, int op) noexcept;
@@ -348,6 +419,18 @@ void CallLogger::Impl::init_method(
 {
   safe_init([&] {
     *out_ << R(obj) << '.' << pkargs->get_short_name() << '(';
+    print_arguments(args, kwds);
+    *out_ << ')';
+  });
+}
+
+
+void CallLogger::Impl::init_method(
+    const py::XArgs* xargs, py::robj obj, py::robj args, py::robj kwds)
+    noexcept
+{
+  safe_init([&] {
+    *out_ << R(obj) << '.' << xargs->qualified_name() << '(';
     print_arguments(args, kwds);
     *out_ << ')';
   });
@@ -426,6 +509,13 @@ void CallLogger::Impl::init_delbuffer(py::robj obj, void* buf) noexcept {
 void CallLogger::Impl::init_len(py::robj obj) noexcept {
   safe_init([&] {
     *out_ << R(obj) << ".__len__()";
+  });
+}
+
+
+void CallLogger::Impl::init_hash(py::robj obj) noexcept {
+  safe_init([&] {
+    *out_ << R(obj) << ".__hash__()";
   });
 }
 
@@ -590,6 +680,18 @@ CallLogger CallLogger::method(const py::PKArgs* pkargs,
 }
 
 
+CallLogger CallLogger::method(const py::XArgs* xargs,
+    PyObject* pyobj, PyObject* pyargs, PyObject* pykwds) noexcept
+{
+  CallLogger cl;
+  if (cl.impl_) {
+    cl.impl_->init_method(xargs, py::robj(pyobj), py::robj(pyargs),
+                          py::robj(pykwds));
+  }
+  return cl;
+}
+
+
 CallLogger CallLogger::dealloc(PyObject* pyobj) noexcept {
   CallLogger cl;
   if (cl.impl_) cl.impl_->init_dealloc(pyobj);
@@ -646,6 +748,15 @@ CallLogger CallLogger::len(PyObject* pyobj) noexcept {
   CallLogger cl;
   if (cl.impl_) {
     cl.impl_->init_len(py::robj(pyobj));
+  }
+  return cl;
+}
+
+
+CallLogger CallLogger::hash(PyObject* pyobj) noexcept {
+  CallLogger cl;
+  if (cl.impl_) {
+    cl.impl_->init_hash(py::robj(pyobj));
   }
   return cl;
 }

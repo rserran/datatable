@@ -1,5 +1,6 @@
 
-.. xdata:: datatable.options.debug
+.. xclass:: datatable.options.debug
+    :qual-type: class
     :src: --
 
     This namespace contains the following debug options:
@@ -12,13 +13,13 @@
           - The number of characters to use per a function/method argument.
 
         * - :attr:`.enabled <datatable.options.debug.enabled>`
-          - Switch that enables logging of the debug information.
+          - Option that enables logging of the debug information.
 
         * - :attr:`.logger <datatable.options.debug.logger>`
           - The custom logger object.
 
         * - :attr:`.report_args <datatable.options.debug.report_args>`
-          - Switch that enables logging of the function/method arguments.
+          - Option that enables logging of the function/method arguments.
 
 .. toctree::
      :hidden:

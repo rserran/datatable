@@ -23,7 +23,6 @@
 #include "expr/eval_context.h"
 #include "expr/py_by.h"
 #include "expr/py_join.h"
-#include "expr/py_sort.h"
 #include "expr/py_update.h"
 #include "expr/workframe.h"
 #include "frame/py_frame.h"
@@ -75,8 +74,8 @@ void EvalContext::add_sortby(py::osort obj) {
   } else {
     reverse_ = false;
   }
+  na_position_ = obj.get_na_position().at(0);
 }
-
 
 void EvalContext::add_i(py::oobj oi) {
   iexpr_ = as_fexpr(oi);
@@ -241,6 +240,10 @@ bool EvalContext::reverse_sort() {
   return reverse_;
 }
 
+NaPosition EvalContext::get_na_position() const {
+  return na_position_;
+}
+
 void EvalContext::compute_groupby_and_sort() {
   size_t nr = nrows();
   if (byexpr_ || sortexpr_) {
@@ -268,7 +271,7 @@ void EvalContext::compute_groupby_and_sort() {
       wf.truncate_columns(n_group_cols);
       set_groupby_columns(std::move(wf));
 
-      auto rigb = group(cols, flags);
+      auto rigb = group(cols, flags, get_na_position());
       apply_rowindex(std::move(rigb.first));
       groupby_ = std::move(rigb.second);
     }
@@ -431,7 +434,8 @@ void EvalContext::typecheck_for_update(
     Workframe& replframe, const sztvec& indices)
 {
   DataTable* dt0 = get_datatable(0);
-  bool allrows = !(get_rowindex(0));
+  Kind ikind = iexpr_->get_expr_kind();
+  bool allrows = (ikind == Kind::SliceAll || ikind == Kind::None);
   bool repl_1row = replframe.get_grouping_mode() == Grouping::SCALAR;
   size_t n = indices.size();
   xassert(replframe.ncols() == indices.size());
@@ -439,12 +443,12 @@ void EvalContext::typecheck_for_update(
   for (size_t i = 0; i < n; ++i) {
     const Column& lcol = dt0->get_column(indices[i]);
     const Column& rcol = replframe.get_column(i);
-    if (!lcol || lcol.stype() == SType::VOID) continue;
+    if (!lcol) continue;
     if (allrows && !repl_1row) continue; // Keep rcol's type as-is
     if (lcol.stype() != rcol.stype()) {
       auto llt = lcol.ltype();
       auto rlt = rcol.ltype();
-      bool ok = (llt == rlt) ||
+      bool ok = (llt == rlt) || (llt == LType::MU) ||
                 (llt == LType::REAL && rlt == LType::INT);
       if (!ok) {
         throw TypeError() << "Cannot assign " << rlt
@@ -493,9 +497,11 @@ static void _vivify_workframe(const Workframe& wf) {
   for (size_t i = 0; i < wf.ncols(); ++i) {
     const Column& col = wf.get_column(i);
     switch (col.stype()) {
+      case SType::VOID:
       case SType::BOOL:
       case SType::INT8:    _vivify_column<int8_t>(col); break;
       case SType::INT16:   _vivify_column<int16_t>(col); break;
+      case SType::DATE32:
       case SType::INT32:   _vivify_column<int32_t>(col); break;
       case SType::INT64:   _vivify_column<int64_t>(col); break;
       case SType::FLOAT32: _vivify_column<float>(col); break;

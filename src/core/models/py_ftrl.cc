@@ -108,7 +108,7 @@ nepochs: float
 double_precision: bool
     An option to indicate whether double precision, i.e. `float64`,
     or single precision, i.e. `float32`, arithmetic should be used
-    for computations. It is not guaranteed, that setting
+    for computations. It is not guaranteed that setting
     `double_precision` to `True` will automatically improve
     the model accuracy. It will, however, roughly double the memory
     footprint of the `Ftrl` object.
@@ -130,7 +130,7 @@ interactions: List[List[str] | Tuple[str]] | Tuple[List[str] | Tuple[str]]
 
 model_type: "binomial" | "multinomial" | "regression" | "auto"
     The model type to be built. When this option is `"auto"`
-    then the model type will be automatically choosen based on
+    then the model type will be automatically chosen based on
     the target column `stype`.
 
 params: FtrlParams
@@ -298,7 +298,7 @@ R"(fit(self, X_train, y_train, X_validation=None, y_validation=None,
     validation_average_niterations=1)
 --
 
-Train FTRL model on a dataset.
+Train model on the input samples and targets.
 
 Parameters
 ----------
@@ -335,7 +335,7 @@ return: FtrlFitOutput
 
 See also
 --------
-- :meth:`.predict` -- predict on a dataset.
+- :meth:`.predict` -- predict for the input samples.
 - :meth:`.reset` -- reset the model.
 
 )";
@@ -515,7 +515,7 @@ static const char* doc_predict =
 R"(predict(self, X)
 --
 
-Make predictions for a dataset.
+Predict for the input samples.
 
 Parameters
 ----------
@@ -530,7 +530,7 @@ return: Frame
 
 See also
 --------
-- :meth:`.fit` -- train model on a dataset.
+- :meth:`.fit` -- train model on the input samples and targets.
 - :meth:`.reset` -- reset the model.
 
 )";
@@ -565,12 +565,6 @@ oobj Ftrl::predict(const PKArgs& args) {
     throw ValueError() << "Frames used for training and predictions "
                        << "should have the same column names";
   }
-
-  if (!py_params->get_attr("interactions").is_none()
-      && !dtft->get_interactions().size()) {
-    init_dt_interactions();
-  }
-
 
   if (!py_params->get_attr("interactions").is_none()
       && !dtft->get_interactions().size()) {
@@ -628,7 +622,7 @@ Parameters
 ----------
 return: Frame
     A one-column frame with the classification labels.
-    In the case of the numeric regression the label is
+    In the case of numeric regression, the label is
     the target column name.
 )";
 
@@ -852,11 +846,11 @@ Parameters
 return: float
     Current `alpha` value.
 
-newalpha: float
+new_alpha: float
     New `alpha` value, should be positive.
 
 except: ValueError
-    The exception is raised when `newalpha` is not positive.
+    The exception is raised when `new_alpha` is not positive.
 )";
 
 static GSArgs args_alpha(
@@ -892,11 +886,11 @@ Parameters
 return: float
     Current `beta` value.
 
-newbeta: float
+new_beta: float
     New `beta` value, should be non-negative.
 
 except: ValueError
-    The exception is raised when `newbeta` is negative.
+    The exception is raised when `new_beta` is negative.
 
 )";
 
@@ -934,11 +928,11 @@ Parameters
 return: float
     Current `lambda1` value.
 
-newlambda1: float
+new_lambda1: float
     New `lambda1` value, should be non-negative.
 
 except: ValueError
-    The exception is raised when `newlambda1` is negative.
+    The exception is raised when `new_lambda1` is negative.
 
 )";
 
@@ -976,11 +970,11 @@ Parameters
 return: float
     Current `lambda2` value.
 
-newlambda2: float
+new_lambda2: float
     New `lambda2` value, should be non-negative.
 
 except: ValueError
-    The exception is raised when `newlambda2` is negative.
+    The exception is raised when `new_lambda2` is negative.
 
 )";
 
@@ -1018,14 +1012,14 @@ Parameters
 return: int
     Current `nbins` value.
 
-newnbins: int
+new_nbins: int
     New `nbins` value, should be positive.
 
 except: ValueError
     The exception is raised when
 
     - trying to change this option for a model that has already been trained;
-    - `newnbins` value is not positive.
+    - `new_nbins` value is not positive.
 
 )";
 
@@ -1068,7 +1062,7 @@ Parameters
 return: int
     Current `mantissa_nbits` value.
 
-newmantissa_nbits: int
+new_mantissa_nbits: int
     New `mantissa_nbits` value, should be non-negative and
     less than or equal to `52`, that is a number of
     mantissa bits in a C++ 64-bit `double`.
@@ -1077,7 +1071,7 @@ except: ValueError
     The exception is raised when
 
     - trying to change this option for a model that has already been trained;
-    - `newmantissa_nbits` value is negative or larger than `52`.
+    - `new_mantissa_nbits` value is negative or larger than `52`.
 
 )";
 
@@ -1129,11 +1123,11 @@ Parameters
 return: float
     Current `nepochs` value.
 
-newnepochs: float
+new_nepochs: float
     New `nepochs` value, should be non-negative.
 
 except: ValueError
-    The exception is raised when `newnepochs` value is negative.
+    The exception is raised when `new_nepochs` value is negative.
 
 )";
 
@@ -1216,15 +1210,12 @@ Parameters
 return: bool
     Current `negative_class` value.
 
-newnegative_class: bool
+new_negative_class: bool
     New `negative_class` value.
 
 except: ValueError
     The exception is raised when trying to change this option
     for a model that has already been trained.
-
-except: TypeError
-    The exception is raised when `newnegative_class` is not `bool`.
 
 )";
 
@@ -1265,7 +1256,7 @@ Parameters
 return: Tuple
     Current `interactions` value.
 
-newinteractions: List[List[str] | Tuple[str]] | Tuple[List[str] | Tuple[str]]
+new_interactions: List[List[str] | Tuple[str]] | Tuple[List[str] | Tuple[str]]
     New `interactions` value. Each particular interaction
     should be a list or a tuple of feature names, where each feature
     name is a column name from the training frame.
@@ -1275,10 +1266,6 @@ except: ValueError
 
     - trying to change this option for a model that has already been trained;
     - one of the interactions has zero features.
-
-except: TypeError
-    The exception is raised when `newinteractions` has a wrong type.
-
 
 )";
 
@@ -1362,14 +1349,14 @@ Parameters
 return: str
     Current `model_type` value.
 
-newmodel_type: "binomial" | "multinomial" | "regression" | "auto"
+new_model_type: "binomial" | "multinomial" | "regression" | "auto"
     New `model_type` value.
 
 except: ValueError
     The exception is raised when
 
     - trying to change this option for a model that has already been trained;
-    - `newmodel_type` value is not one of the following: `"binomial"`,
+    - `new_model_type` value is not one of the following: `"binomial"`,
       `"multinomial"`, `"regression"` or `"auto"`.
 
 See also
@@ -1451,14 +1438,13 @@ Parameters
 return: FtrlParams
     Current `params` value.
 
-newparams: FtrlParams
+new_params: FtrlParams
     New `params` value.
 
 except: ValueError
     The exception is raised when
 
-    - trying to change this option for a model that has alerady been trained;
-
+    - trying to change this option for a model that has already been trained;
     - individual parameter values are incompatible with the corresponding setters.
 
 )";
@@ -1654,9 +1640,9 @@ void Ftrl::m__setstate__(const PKArgs& args) {
 //------------------------------------------------------------------------------
 
 static const char* doc_Ftrl =
-R"(Follow the Regularized Leader (FTRL) model.
-
-FTRL model is a datatable implementation of the
+R"(
+This class implements the Follow the Regularized Leader (FTRL) model,
+that is based on the
 `FTRL-Proximal <https://www.eecs.tufts.edu/~dsculley/papers/ad-click-prediction.pdf>`_
 online learning algorithm for binomial logistic regression. Multinomial
 classification and regression for continuous targets are also implemented,

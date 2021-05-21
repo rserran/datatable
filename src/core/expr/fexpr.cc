@@ -26,6 +26,7 @@
 #include "expr/fexpr_literal.h"
 #include "expr/expr.h"            // OldExpr
 #include "python/obj.h"
+#include "python/xargs.h"
 #include "utils/exceptions.h"
 namespace dt {
 namespace expr {
@@ -108,7 +109,8 @@ using namespace py;
 
 // static "constructor"
 oobj PyFExpr::make(FExpr* expr) {
-  oobj res = robj(reinterpret_cast<PyObject*>(FExpr_Type)).call();
+  xassert(FExpr_Type);
+  oobj res = robj(FExpr_Type).call();
   auto fexpr = reinterpret_cast<PyFExpr*>(res.to_borrowed_ref());
   fexpr->expr_ = ptrExpr(expr);
   return res;
@@ -285,7 +287,7 @@ static const char* doc_re_match =
 R"(re_match(self, pattern, flags=None)
 --
 
-.. deprecated:: 0.11
+.. x-version-deprecated:: 0.11
 
 Test whether values in a string column match a regular expression.
 
@@ -320,6 +322,266 @@ oobj PyFExpr::re_match(const PKArgs& args) {
 }
 
 
+
+
+//------------------------------------------------------------------------------
+// Miscellaneous
+//------------------------------------------------------------------------------
+
+static const char* doc_sum =
+R"(sum()
+--
+
+Equivalent to :func:`dt.sum(self)`.
+)";
+
+oobj PyFExpr::sum(const XArgs&) {
+  auto sumFn = oobj::import("datatable", "sum");
+  return sumFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::sum)
+    ->name("sum")
+    ->docs(doc_sum);
+
+static const char* doc_max =
+R"(max()
+--
+
+Equivalent to :func:`dt.max(self)`.
+)";
+
+oobj PyFExpr::max(const XArgs&) {
+  auto maxFn = oobj::import("datatable", "max");
+  return maxFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::max)
+    ->name("max")
+    ->docs(doc_max);
+
+
+static const char* doc_mean =
+R"(mean()
+--
+
+Equivalent to :func:`dt.mean(self)`.
+)";
+
+oobj PyFExpr::mean(const XArgs&) {
+  auto meanFn = oobj::import("datatable", "mean");
+  return meanFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::mean)
+    ->name("mean")
+    ->docs(doc_mean);
+
+
+static const char* doc_median =
+R"(median()
+--
+
+Equivalent to :func:`dt.median(self)`.
+)";
+
+oobj PyFExpr::median(const XArgs&) {
+  auto medianFn = oobj::import("datatable", "median");
+  return medianFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::median)
+    ->name("median")
+    ->docs(doc_median);
+
+
+static const char* doc_min =
+R"(min()
+--
+
+Equivalent to :func:`dt.min(self)`.
+)";
+
+oobj PyFExpr::min(const XArgs&) {
+  auto minFn = oobj::import("datatable", "min");
+  return minFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::min)
+    ->name("min")
+    ->docs(doc_min);
+static const char* doc_rowall =
+R"(rowall()
+--
+
+Equivalent to :func:`dt.rowall(self)`.
+)";
+
+oobj PyFExpr::rowall(const XArgs&) {
+  auto rowallFn = oobj::import("datatable", "rowall");
+  return rowallFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowall)
+    ->name("rowall")
+    ->docs(doc_rowall);
+
+
+static const char* doc_rowany =
+R"(rowany()
+--
+
+Equivalent to :func:`dt.rowany(self)`.
+)";
+
+oobj PyFExpr::rowany(const XArgs&) {
+  auto rowanyFn = oobj::import("datatable", "rowany");
+  return rowanyFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowany)
+    ->name("rowany")
+    ->docs(doc_rowany);
+
+
+static const char* doc_rowcount =
+R"(rowcount()
+--
+
+Equivalent to :func:`dt.rowcount(self)`.
+)";
+
+oobj PyFExpr::rowcount(const XArgs&) {
+  auto rowcountFn = oobj::import("datatable", "rowcount");
+  return rowcountFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowcount)
+    ->name("rowcount")
+    ->docs(doc_rowcount);
+
+
+static const char* doc_rowfirst =
+R"(rowfirst()
+--
+
+Equivalent to :func:`dt.rowfirst(self)`.
+)";
+
+oobj PyFExpr::rowfirst(const XArgs&) {
+  auto rowfirstFn = oobj::import("datatable", "rowfirst");
+  return rowfirstFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowfirst)
+    ->name("rowfirst")
+    ->docs(doc_rowfirst);
+
+
+static const char* doc_rowlast =
+R"(rowlast()
+--
+
+Equivalent to :func:`dt.rowlast(self)`.
+)";
+
+oobj PyFExpr::rowlast(const XArgs&) {
+  auto rowlastFn = oobj::import("datatable", "rowlast");
+  return rowlastFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowlast)
+    ->name("rowlast")
+    ->docs(doc_rowlast);
+
+
+static const char* doc_rowmax =
+R"(rowmax()
+--
+
+Equivalent to :func:`dt.rowmax(self)`.
+)";
+
+oobj PyFExpr::rowmax(const XArgs&) {
+  auto rowmaxFn = oobj::import("datatable", "rowmax");
+  return rowmaxFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowmax)
+    ->name("rowmax")
+    ->docs(doc_rowmax);
+
+
+static const char* doc_rowmean =
+R"(rowmean()
+--
+
+Equivalent to :func:`dt.rowmean(self)`.
+)";
+
+oobj PyFExpr::rowmean(const XArgs&) {
+  auto rowmeanFn = oobj::import("datatable", "rowmean");
+  return rowmeanFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowmean)
+    ->name("rowmean")
+    ->docs(doc_rowmean);
+
+
+static const char* doc_rowmin =
+R"(rowmin()
+--
+
+Equivalent to :func:`dt.rowmin(self)`.
+)";
+
+oobj PyFExpr::rowmin(const XArgs&) {
+  auto rowminFn = oobj::import("datatable", "rowmin");
+  return rowminFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowmin)
+    ->name("rowmin")
+    ->docs(doc_rowmin);
+
+
+static const char* doc_rowsd =
+R"(rowsd()
+--
+
+Equivalent to :func:`dt.rowsd(self)`.
+)";
+
+oobj PyFExpr::rowsd(const XArgs&) {
+  auto rowsdFn = oobj::import("datatable", "rowsd");
+  return rowsdFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowsd)
+    ->name("rowsd")
+    ->docs(doc_rowsd);
+
+
+static const char* doc_rowsum =
+R"(rowsum()
+--
+
+Equivalent to :func:`dt.rowsum(self)`.
+)";
+
+oobj PyFExpr::rowsum(const XArgs&) {
+  auto rowsumFn = oobj::import("datatable", "rowsum");
+  return rowsumFn.call({this});
+}
+
+DECLARE_METHOD(&PyFExpr::rowsum)
+    ->name("rowsum")
+    ->docs(doc_rowsum);
+
+//------------------------------------------------------------------------------
+// Class decoration
+//------------------------------------------------------------------------------
 
 static const char* doc_fexpr =
 R"(
@@ -391,7 +653,9 @@ void PyFExpr::impl_init_type(XTypeMaker& xt) {
   xt.add(METHOD__POS__(&PyFExpr::nb__pos__));
   xt.add(METHOD__CMP__(&PyFExpr::m__compare__));
 
-  FExpr_Type = &type;
+  FExpr_Type = xt.get_type_object();
+
+  INIT_METHODS_FOR_CLASS(PyFExpr);
 }
 
 

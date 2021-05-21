@@ -1,15 +1,16 @@
 
-.. xdata:: datatable.options.fread
+.. xclass:: datatable.options.fread
+    :qual-type: class
     :src: --
 
-    This namespace contains the following :func:`dt.fread()` option groups:
+    This namespace contains the following :func:`fread <dt.fread>` option groups:
 
     .. list-table::
         :widths: auto
         :class: api-table
 
-        * - :data:`.log <datatable.options.fread.log>`
-          - Logging related options.
+        * - :class:`.log <datatable.options.fread.log>`
+          - Logging-related options.
 
 .. toctree::
     :hidden:

@@ -1,6 +1,4 @@
 
-.. py:module:: datatable.models
-
 .. xpy:module:: datatable.models
 
 datatable.models
@@ -15,6 +13,9 @@ Classes
 
     * - :class:`Ftrl`
       - FTRL-Proximal online learning model.
+
+    * - :class:`LinearModel`
+      - Linear model with stohastic gradient descent learning.
 
 
 Functions
@@ -38,6 +39,7 @@ Functions
     :hidden:
 
     Ftrl            <models/ftrl>
+    LinearModel     <models/linear_model>
     aggregate()     <models/aggregate>
     kfold()         <models/kfold>
     kfold_random()  <models/kfold_random>
