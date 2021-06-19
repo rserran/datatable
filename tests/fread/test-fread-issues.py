@@ -542,11 +542,12 @@ def test_issue2523():
     with pytest.raises(IOError):
         dt.fread("{\n  \"cells\": [\n    {\n\"import numpy \\n\",\n")
 
-# Note: Realised after adding this test that it's similar to test_issue1036
+
 def test_issue2680():
     src = '1\tWild Hogs (2007)\tAdevnture\n' * 500 + '2\t"Great Performances" Cats (1998)\tMusical\n' * 500
     DT = dt.fread(src, fill=True)
     assert DT.to_tuples()[900] == (2, '"Great Performances" Cats (1998)', 'Musical')
+
 
 def test_issue934():
     DT = dt.fread("A,B,C\n1,2,3\n3,4,5\n0,0,\"moo\n\n")
@@ -554,7 +555,6 @@ def test_issue934():
     assert DT[2, 2] == '"moo'  # without extra newlines!
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize('shape', [(int(random.expovariate(0.001) + 100),
                                     int(random.expovariate(0.001) + 100))])
 def test_issue1036(shape):
@@ -575,3 +575,13 @@ def test_issue2681():
         dt.Frame(A=['rr'] + ['1']*99 + ['abc'],
                  B=['dd"'] + ['2']*99 + ['def'],
                  C=['g'] + ['3']*99 + [None]))
+
+
+def test_issue2943():
+    src1 = '\tA\tB\tC\n' + '\t1\tTrue\t3.0\n' + '\t12\tFalse\t1.5\n'
+    src2 = '\t\t\tA\tB\tC\n' + '\t\t\t1\tTrue\t3.0\n' + '\t\t\t12\tFalse\t1.5\n'
+    EXP = dt.Frame(A=[1,12], B=[True, False], C=[3.0, 1.5])
+    DT = dt.fread(src1)
+    assert_equals(DT[:, 'A':'C'], EXP)
+    DT = dt.fread(src2)
+    assert_equals(DT[:, 'A':'C'], EXP)

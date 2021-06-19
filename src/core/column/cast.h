@@ -250,5 +250,77 @@ class CastObject_ColumnImpl : public Cast_ColumnImpl {
 
 
 
+//------------------------------------------------------------------------------
+// CastObjToTime64_ColumnImpl
+//------------------------------------------------------------------------------
+
+class CastObjToTime64_ColumnImpl : public Cast_ColumnImpl {
+  public:
+    CastObjToTime64_ColumnImpl(Column&&);
+    ColumnImpl* clone() const override;
+    bool allow_parallel_access() const override;
+
+    bool get_element(size_t, int64_t*) const override;
+};
+
+
+
+
+//------------------------------------------------------------------------------
+// CastStringToTime64_ColumnImpl
+//------------------------------------------------------------------------------
+
+class CastStringToTime64_ColumnImpl : public Cast_ColumnImpl {
+  public:
+    CastStringToTime64_ColumnImpl(Column&&);
+    ColumnImpl* clone() const override;
+    bool get_element(size_t, int64_t*) const override;
+};
+
+
+
+
+//------------------------------------------------------------------------------
+// CastStringToTime64_ColumnImpl
+//------------------------------------------------------------------------------
+
+class CastTime64ToDate32_ColumnImpl : public Cast_ColumnImpl {
+  public:
+    CastTime64ToDate32_ColumnImpl(Column&&);
+    ColumnImpl* clone() const override;
+    bool get_element(size_t, int32_t*) const override;
+};
+
+
+
+
+//------------------------------------------------------------------------------
+// CastTime64ToString_ColumnImpl
+//------------------------------------------------------------------------------
+
+class CastTime64ToString_ColumnImpl : public Cast_ColumnImpl {
+  public:
+    CastTime64ToString_ColumnImpl(SType, Column&&);
+    ColumnImpl* clone() const override;
+    bool get_element(size_t, CString*) const override;
+};
+
+
+
+
+//------------------------------------------------------------------------------
+// CastTime64ToObj64_ColumnImpl
+//------------------------------------------------------------------------------
+
+class CastTime64ToObj64_ColumnImpl : public Cast_ColumnImpl {
+  public:
+    CastTime64ToObj64_ColumnImpl(Column&&);
+    ColumnImpl* clone() const override;
+    bool get_element(size_t, py::oobj*) const override;
+};
+
+
+
+
 }  // namespace dt
 #endif

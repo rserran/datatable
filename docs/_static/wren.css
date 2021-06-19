@@ -84,10 +84,15 @@ a > code.literal {
   background: inherit;
   border: inherit;
   color: inherit;
+  padding: 0;
 }
 
 .align-default {
   text-align: left;
+}
+
+table.align-default {
+  margin-left: 0;
 }
 
 table.docutils td, table.docutils th {

@@ -9,6 +9,9 @@
       objects for each column of the frame. These types are a generalization
       of previous stypes, and will eventually replace them.
 
+      Property :attr:`.type` returns the common :class:`dt.Type` for all
+      columns of the frame (provided that it exists).
+
     -[new] New column type :attr:`dt.Type.date32` added, which can store a
       calendar date [#2858]::
 
@@ -47,9 +50,16 @@
       and :meth:`.median() <dt.FExpr.median>`, which behaves exactly as the
       equivalent base level functions :func:`dt.max()`, :func:`dt.min()`,
       :func:`dt.mean()`,  and :func:`dt.median()` respectively.
-      
-    -[new] Class :class:`dt.FExpr` now has methods for all the 
+
+    -[new] Class :class:`dt.FExpr` now has methods for all the
       row functions (:func:`dt.rowsum()`, :func:`dt.rowall()`, etc).
+
+    -[new] Class :class:`dt.FExpr` now has methods :meth:`.sd() <dt.FExpr.sd>`,
+      :meth:`.count() <dt.FExpr.count>`, :meth:`.first() <dt.FExpr.first>`,
+      and :meth:`.last() <dt.FExpr.last>`, :meth:`.shift() <dt.FExpr.last>`,
+      which behaves exactly as the equivalent base level functions :func:`dt.sd()`,
+      :func:`dt.count()`, :func:`dt.first()`, :func:`dt.last()`
+      and :func:`dt.shift()` respectively.
 
     -[enh] The row selector ``i`` in the delete operation ``del DT[i, :]``
       can now be an unsorted list. The list can also contain duplicate
@@ -62,6 +72,9 @@
     -[enh] When a Frame is shown in a python console, it will now display
       the stype of each column, as a second line under the column names.
       [#2810]
+
+    -[enh] Parameter ``types=`` in Frame's constructor can now accept arguments
+      of class :class:`Type`, and also pyarrow's types. [#2986]
 
     -[fix] A Frame can now be created properly from a list of numpy bool
       objects. [#2762]
@@ -95,6 +108,10 @@
       a :exc:`dt.exceptions.TypeError` will  be thrown. An ``object`` column
       can still be created by an explicit request via the ``stype=``
       parameter in the constructor.
+
+    -[api] Parameter ``stypes=`` in Frame constructor was renamed into
+      ``types=``, and similarly ``stype=`` into ``type=``. The old parameter
+      names are still recognized, but no longer documented.
 
 
     FExpr
@@ -149,6 +166,7 @@
     -[fix] Fread no longer throws an exception when the list of column types
       passed to parameter ``columns=`` contains ``str64``. [#2704]
 
+    -[fix] Fread no longer detects separators within quoted strings. [#922]
 
     Models
     ------
