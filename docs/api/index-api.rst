@@ -28,6 +28,12 @@ Submodules
     * - :mod:`models. <datatable.models>`
       - A small set of data analysis tools.
 
+    * - :mod:`re. <datatable.re>`
+      - Functions using regular expressions.
+
+    * - :mod:`str. <datatable.str>`
+      - Functions for working with string columns.
+
     * - :mod:`time. <datatable.time>`
       - Functions for working with date/time columns.
 
@@ -107,7 +113,7 @@ Functions
     * - :func:`qcut()`
       - Bin a column into equal-population intervals
     * - :func:`split_into_nhot()`
-      - Split and nhot-encode a single-column frame
+      - [DEPRECATED] Split and nhot-encode a single-column frame
 
     * -
       -
@@ -150,21 +156,23 @@ Functions
     * - :func:`corr()`
       - Calculate correlation between two columns
     * - :func:`count()`
-      - Count non-missing values per a column
+      - Count non-missing values per column
+    * - :func:`countna()`
+      - Count the number of NA values per column
     * - :func:`cov()`
       - Calculate covariance between two columns
     * - :func:`max()`
-      - Find the largest element per a column
+      - Find the largest element per column
     * - :func:`mean()`
-      - Calculate mean value per a column
+      - Calculate mean value per column
     * - :func:`median()`
-      - Find the median element per a column
+      - Find the median element per column
     * - :func:`min()`
-      - Find the smallest element per a column
+      - Find the smallest element per column
     * - :func:`sd()`
-      - Calculate the standard deviation per a column
+      - Calculate the standard deviation per column
     * - :func:`sum()`
-      - Calculate the sum of all values per a column
+      - Calculate the sum of all values per column
 
 
 Other
@@ -199,6 +207,8 @@ Other
     math.             <math>
     models.           <models>
     options.          <options>
+    re.               <re>
+    str.              <str>
     time.             <time>
     FExpr             <fexpr>
     Frame             <frame>
@@ -212,6 +222,7 @@ Other
     cbind()           <dt/cbind>
     corr()            <dt/corr>
     count()           <dt/count>
+    countna()         <dt/countna>
     cov()             <dt/cov>
     cut()             <dt/cut>
     dt                <dt/dt>

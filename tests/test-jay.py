@@ -51,16 +51,6 @@ def test_jay_simple(tempfile_jay):
     assert_equals(dt0, dt1)
 
 
-def test_open(tempfile_jay):
-    DT = dt.Frame(A=range(5))
-    DT.to_jay(tempfile_jay)
-    with pytest.warns(FutureWarning):
-        DT2 = dt.open(tempfile_jay)
-    assert DT.source is None
-    assert DT2.source == tempfile_jay
-    assert_equals(DT, DT2)
-
-
 def test_fread(tempfile_jay):
     # Check that Jay format can be read even if the file's extension isn't "jay"
     tempfile_joy = tempfile_jay[:-4] + ".joy"
@@ -154,6 +144,24 @@ def test_jay_empty_frame(tempfile_jay):
     assert d1.shape == (0, 0)
     assert d1.names == tuple()
     assert d1.source == tempfile_jay
+
+
+def test_jay_void_column():
+    DT = dt.Frame([None] * 5)
+    jay = DT.to_jay()
+    RES = dt.fread(jay)
+    assert_equals(DT, RES)
+
+
+def test_jay_void_column_typecast():
+    DT = dt.Frame([None] * 10)
+    assert DT.type == dt.Type.void
+    DT[0] = dt.Type.int32
+    assert DT.type == dt.Type.int32
+    jay = DT.to_jay()
+    RES = dt.fread(jay)
+    assert RES.type == dt.Type.int32
+    assert_equals(RES, dt.Frame([None]*10, type='int32'))
 
 
 def test_jay_all_types(tempfile_jay):

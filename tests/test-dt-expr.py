@@ -90,6 +90,8 @@ def test_logical_and2(seed):
     src2 = [random.choice([True, False, None]) for _ in range(n)]
 
     df0 = dt.Frame(A=src1, B=src2)
+    assert df0['A'].to_list()[0] == src1
+    assert df0['B'].to_list()[0] == src2
     df1 = df0[:, f.A & f.B]
     assert df1.to_list()[0] == \
         [False if (src1[i] is False or src2[i] is False) else
@@ -219,3 +221,21 @@ def test_expr_names():
     # See issue #1963
     DT = dt.Frame(A=range(5), B=range(5))
     assert DT[:, [f.A, f.A + f.B]].names == ("A", "C0")
+
+
+def test_use_numpy_scalars(np):
+    # See issue #3027
+    DT = dt.Frame(A=range(5))
+    RES = DT[:, [f.A,
+                 f.A + np.int32(1),
+                 f.A + np.float32(0.5),
+                 f.A | np.bool_(True),
+                 np.str_('(') + f.A + np.str_(')')]]
+    assert_equals(
+        RES,
+        dt.Frame(A=range(5),
+                 C0=[1, 2, 3, 4, 5],
+                 C1=[0.5, 1.5, 2.5, 3.5, 4.5],
+                 C2=[1, 1, 3, 3, 5],
+                 C3=["(0)", "(1)", '(2)', "(3)", "(4)"])
+    )

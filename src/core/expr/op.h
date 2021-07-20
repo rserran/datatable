@@ -31,9 +31,8 @@ static constexpr size_t UNOP_FIRST    = 101;
 static constexpr size_t UNOP_LAST     = 103;
 static constexpr size_t BINOP_FIRST   = 201;
 static constexpr size_t BINOP_LAST    = 218;
-static constexpr size_t STRING_FIRST  = 301;
 static constexpr size_t REDUCER_FIRST = 401;
-static constexpr size_t REDUCER_LAST  = 412;
+static constexpr size_t REDUCER_LAST  = 413;
 static constexpr size_t MATH_FIRST    = 501;
 static constexpr size_t MATH_LAST     = 554;
 static constexpr size_t UNOP_COUNT    = UNOP_LAST - UNOP_FIRST + 1;
@@ -63,10 +62,6 @@ enum class Op : size_t {
   LSHIFT = 211,             // fbinary/bitwise.cc
   RSHIFT = 212,             // fbinary/bitwise.cc
 
-  // String
-  RE_MATCH = STRING_FIRST,  // head_func_other.cc
-  LEN,                      // funary/basic.cc
-
   // Reducers
   MEAN = REDUCER_FIRST,     // head_reduce_unary.cc
   MIN,                      // head_reduce_unary.cc
@@ -79,7 +74,8 @@ enum class Op : size_t {
   COUNT0,                   // head_reduce_nullary.cc
   MEDIAN,                   // head_reduce_unary.cc
   COV,                      // head_reduce_binary.cc
-  CORR = REDUCER_LAST,      // head_reduce_binary.cc
+  CORR,                     // head_reduce_binary.cc
+  COUNTNA = REDUCER_LAST,   // head_reduce_unary.cc
 
   // Math: trigonometric
   SIN = MATH_FIRST,         // funary/trigonometric.cc

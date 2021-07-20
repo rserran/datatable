@@ -32,6 +32,7 @@
 #include "python/list.h"
 #include "python/obj.h"
 #include "python/string.h"
+#include "read/parsers/info.h"
 #include "stype.h"
 #include "types/py_type.h"
 #include "utils/macros.h"
@@ -51,6 +52,7 @@ static PyObject* numpy_int64 = nullptr;
 static PyObject* numpy_float16 = nullptr;
 static PyObject* numpy_float32 = nullptr;
 static PyObject* numpy_float64 = nullptr;
+static PyObject* numpy_str = nullptr;
 static void init_arrow();
 static void init_pandas();
 static void init_numpy();
@@ -220,9 +222,11 @@ bool _obj::is_numeric()       const noexcept { return is_float() || is_int(); }
 bool _obj::is_list_or_tuple() const noexcept { return is_list() || is_tuple(); }
 bool _obj::is_int()           const noexcept { return v && PyLong_Check(v) && !is_bool(); }
 bool _obj::is_float()         const noexcept { return v && PyFloat_Check(v); }
+bool _obj::is_float_nan()     const noexcept { return is_float() && std::isnan(PyFloat_AS_DOUBLE(v)); }
 bool _obj::is_string()        const noexcept { return v && PyUnicode_Check(v); }
 bool _obj::is_bytes()         const noexcept { return v && PyBytes_Check(v); }
 bool _obj::is_date()          const noexcept { return v && odate::check(robj(v)); }
+bool _obj::is_datetime()      const noexcept { return v && odatetime::check(robj(v)); }
 bool _obj::is_pytype()        const noexcept { return v && PyType_Check(v); }
 bool _obj::is_ltype()         const noexcept { return v && dt::is_ltype_object(v); }
 bool _obj::is_stype()         const noexcept { return v && dt::is_stype_object(v); }
@@ -310,6 +314,11 @@ int _obj::is_numpy_float() const noexcept {
   return 0;
 }
 
+bool _obj::is_numpy_str() const noexcept {
+  if (!numpy_str) init_numpy();
+  return v && numpy_str && PyObject_IsInstance(v, numpy_str);
+}
+
 bool _obj::is_numpy_marray() const noexcept {
   if (!numpy_MaskedArray_type) init_numpy();
   if (!v || !numpy_MaskedArray_type) return false;
@@ -339,7 +348,10 @@ bool _obj::is_fexpr() const noexcept {
 
 template <typename T>
 static inline bool _parse_none(PyObject* v, T* out) {
-  if (v == Py_None) { *out = dt::GETNA<T>(); return true; }
+  if (v == Py_None || (PyFloat_Check(v) && std::isnan(PyFloat_AS_DOUBLE(v)))) {
+    *out = dt::GETNA<T>();
+    return true;
+  }
   return false;
 }
 
@@ -423,6 +435,9 @@ bool _obj::parse_int(int8_t* out) const  { return _parse_int(v, out); }
 bool _obj::parse_int(int16_t* out) const { return _parse_int(v, out); }
 bool _obj::parse_int(int32_t* out) const { return _parse_int(v, out); }
 bool _obj::parse_int(int64_t* out) const { return _parse_int(v, out); }
+bool _obj::parse_int_as_date(int32_t* out) const { return _parse_int(v, out); }
+bool _obj::parse_int_as_time(int64_t* out) const { return _parse_int(v, out); }
+
 
 bool _obj::parse_int(double* out) const {
   if (PyLong_Check(v)) {
@@ -456,10 +471,10 @@ template <typename T>
 static bool _parse_npint(PyObject* v, T* out) {
   if (!numpy_int64) init_numpy();
   if (numpy_int64 && v) {
-    if ((sizeof(T) >= 8 && PyObject_IsInstance(v, numpy_int64)) ||
-        (sizeof(T) >= 4 && PyObject_IsInstance(v, numpy_int32)) ||
-        (sizeof(T) >= 2 && PyObject_IsInstance(v, numpy_int16)) ||
-        (sizeof(T) >= 1 && PyObject_IsInstance(v, numpy_int8)))
+    if ((sizeof(T) == 8 && PyObject_IsInstance(v, numpy_int64)) ||
+        (sizeof(T) == 4 && PyObject_IsInstance(v, numpy_int32)) ||
+        (sizeof(T) == 2 && PyObject_IsInstance(v, numpy_int16)) ||
+        (sizeof(T) == 1 && PyObject_IsInstance(v, numpy_int8)))
     {
       *out = static_cast<T>(PyNumber_AsSsize_t(v, nullptr));
       return true;
@@ -507,7 +522,7 @@ bool _obj::parse_double(double* out) const {
 }
 
 
-bool _obj::parse_date(int32_t* out) const {
+bool _obj::parse_date_as_date(int32_t* out) const {
   if (py::odate::check(v)) {
     *out = py::odate::unchecked(v).get_days();
     return true;
@@ -515,20 +530,52 @@ bool _obj::parse_date(int32_t* out) const {
   return false;
 }
 
-bool _obj::parse_date(int64_t* out) const {
-  constexpr int64_t SECONDS = 1000000000;
-  constexpr int64_t DAYS = 24 * 3600 * SECONDS;
+bool _obj::parse_date_as_time(int64_t* out) const {
+  constexpr int64_t NANOSECONDS_PER_DAY = 24ll * 3600ll * 1000000000ll;
   if (py::odate::check(v)) {
-    *out = py::odate::unchecked(v).get_days() * DAYS;
+    *out = py::odate::unchecked(v).get_days() * NANOSECONDS_PER_DAY;
     return true;
   }
   return false;
 }
 
-bool _obj::parse_datetime(int64_t* out) const {
+bool _obj::parse_datetime_as_date(int32_t* out) const {
+  constexpr int64_t NANOSECONDS_PER_DAY = 24ll * 3600ll * 1000000000ll;
+  if (py::odatetime::check(v)) {
+    int64_t value = py::odatetime::unchecked(v).get_time();
+    if (value < 0) {
+      value -= NANOSECONDS_PER_DAY - 1;
+    }
+    *out = static_cast<int32_t>(value / NANOSECONDS_PER_DAY);
+    return true;
+  }
+  return false;
+}
+
+bool _obj::parse_datetime_as_time(int64_t* out) const {
   if (py::odatetime::check(v)) {
     *out = py::odatetime::unchecked(v).get_time();
     return true;
+  }
+  return false;
+}
+
+bool _obj::parse_string_as_date(int32_t* out) const {
+  if (PyUnicode_Check(v)) {
+    Py_ssize_t str_size;
+    const char* str = PyUnicode_AsUTF8AndSize(v, &str_size);
+    if (!str) throw PyError();
+    return dt::read::parse_date32_iso(str, str + str_size, out);
+  }
+  return false;
+}
+
+bool _obj::parse_string_as_time(int64_t* out) const {
+  if (PyUnicode_Check(v)) {
+    Py_ssize_t str_size;
+    const char* str = PyUnicode_AsUTF8AndSize(v, &str_size);
+    if (!str) throw PyError();
+    return dt::read::parse_time64_iso(str, str + str_size, out);
   }
   return false;
 }
@@ -563,6 +610,11 @@ int8_t _obj::to_bool_force(const error_manager&) const noexcept {
   if (v == Py_None) return dt::GETNA<int8_t>();
   if (v == Py_True) return 1;
   if (v == Py_False) return 0;
+  if (PyFloat_Check(v)) {
+    double x = PyFloat_AS_DOUBLE(v);
+    return std::isnan(x)? dt::GETNA<int8_t>() :
+           x == 0.0     ? 0 : 1;
+  }
   int r = PyObject_IsTrue(v);
   if (r >= 0) return static_cast<int8_t>(r);
   PyErr_Clear();
@@ -657,6 +709,11 @@ size_t _obj::to_size_t(const error_manager& em) const {
 py::oint _obj::to_pyint(const error_manager& em) const {
   if (v == Py_None) return py::oint();
   if (PyLong_Check(v)) return py::oint(robj(v));
+  if (is_numpy_int()) {
+    PyObject* num = PyNumber_Long(v);
+    if (!num) throw PyError();
+    return py::oint(py::oobj::from_new_reference(num));
+  }
   throw em.error_not_integer(v);
 }
 
@@ -702,8 +759,17 @@ double _obj::to_double(const error_manager& em) const {
 
 
 py::ofloat _obj::to_pyfloat_force(const error_manager&) const noexcept {
-  if (PyFloat_Check(v) || v == Py_None) {
+  if (PyFloat_Check(v)) {
     return py::ofloat(robj(v));
+  }
+  if (v == Py_None) {
+    return py::ofloat(robj());
+  }
+  if (PyLong_Check(v)) {
+    int overflow;
+    auto pyintobj = py::oint(py::robj(v));
+    double value = pyintobj.ovalue<double>(&overflow);
+    return py::ofloat(value);
   }
   PyObject* num = PyNumber_Float(v);  // new ref
   if (!num) {
@@ -749,11 +815,14 @@ std::string _obj::to_string(const error_manager& em) const {
 
 
 py::ostring _obj::to_pystring_force(const error_manager&) const noexcept {
-  if (v == Py_None || v == nullptr) {
+  if (v == nullptr) {
     return py::ostring();
   }
   if (PyUnicode_Check(v)) {
     return py::ostring(py::robj(v));
+  }
+  if (v == Py_None || is_float_nan()) {
+    return py::ostring();
   }
   PyObject* res = PyObject_Str(v);  // new reference
   if (!res) {
@@ -1213,6 +1282,7 @@ static void init_numpy() {
     numpy_float16 = np.get_attr("float16").release();
     numpy_float32 = np.get_attr("float32").release();
     numpy_float64 = np.get_attr("float64").release();
+    numpy_str = np.get_attr("str_").release();
   }
 }
 
