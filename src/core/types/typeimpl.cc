@@ -69,6 +69,7 @@ bool TypeImpl::can_be_read_as_float64()  const { return false; }
 bool TypeImpl::can_be_read_as_date()     const { return false; }
 bool TypeImpl::can_be_read_as_cstring()  const { return false; }
 bool TypeImpl::can_be_read_as_pyobject() const { return false; }
+bool TypeImpl::can_be_read_as_column()   const { return false; }
 
 bool TypeImpl::equals(const TypeImpl* other) const {
   return stype_ == other->stype_;
@@ -81,7 +82,9 @@ const char* TypeImpl::struct_format() const { return ""; }
 
 
 Column TypeImpl::cast_column(Column&&) const {
-  throw NotImplError() << "Unable to cast into type `" << to_string() << "`";
+  throw NotImplError()
+      << "Type casts for type `" << to_string()
+      << "` are not implemented";
 }
 
 

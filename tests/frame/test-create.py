@@ -270,7 +270,7 @@ def test_create_from_empty_list_of_lists():
     frame_integrity_check(d6)
     assert d6.shape == (0, 1)
     assert d6.names == ("C0", )
-    assert d6.ltypes == (ltype.void, )
+    assert d6.types == [dt.Type.void]
 
 
 
@@ -634,6 +634,27 @@ def test_auto_str32_2():
     frame_integrity_check(DT)
     assert DT.stype == stype.str32
     assert DT.to_list() == [[None, "1a", "12", "fini"]]
+
+
+def test_auto_str32_3():
+    DT = dt.Frame([math.nan, "start", None, "end"])
+    frame_integrity_check(DT)
+    assert DT.types == [dt.Type.str32]
+    assert DT.to_list() == [[None, "start", None, "end"]]
+
+
+def test_create_from_strings_and_nans1():
+    DT = dt.Frame(["a", 'bb', math.nan])
+    frame_integrity_check(DT)
+    assert DT.type == dt.Type.str32
+    assert DT.to_list() == [["a", "bb", None]]
+
+
+def test_create_from_strings_and_nans2():
+    DT = dt.Frame([math.nan, None, math.nan, "a", 'bb'])
+    frame_integrity_check(DT)
+    assert DT.type == dt.Type.str32
+    assert DT.to_list() == [[None, None, None, "a", "bb"]]
 
 
 def test_auto_str32_3():

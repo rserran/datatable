@@ -81,3 +81,170 @@ def test_type_array_hashable():
     assert dt.Type.arr64(int) not in store
     assert dt.Type.arr64(float) not in store
     assert dt.Type.arr32(dt.Type.arr32(bool)) not in store
+
+
+@pytest.mark.parametrize('src', [0, 1])
+def test_query_methods(src):
+    tarr = dt.Type.arr32(int) if src else \
+           dt.Type.arr64(str)
+    assert     tarr.is_array
+    assert not tarr.is_boolean
+    assert     tarr.is_compound
+    assert not tarr.is_float
+    assert not tarr.is_integer
+    assert not tarr.is_numeric
+    assert not tarr.is_object
+    assert not tarr.is_string
+    assert not tarr.is_temporal
+    assert not tarr.is_void
+
+
+
+
+#-------------------------------------------------------------------------------
+# Create from (any)
+#-------------------------------------------------------------------------------
+
+def test_create_from_arrow(pa):
+    src = [[1, 3, 8, -14, 5], [2, 0], None, [4], [], [1, -1, 1]]
+    arr = pa.array(src, type=pa.list_(pa.int32()))
+    tbl = pa.Table.from_arrays([arr], names=["A"])
+    DT = dt.Frame(tbl)
+    assert DT.shape == (6, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.int32)
+    assert DT.names == ("A",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python1():
+    src = [[1, 2, 3], [], [4, 5], [6], None, [7, 8, 10, -1]]
+    DT = dt.Frame(A=src)
+    assert DT.shape == (6, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.int32)
+    assert DT.names == ("A",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python2():
+    src = [None, [1.5, 2, 3], [], None, [7, 8.99, 10, None, -1]]
+    DT = dt.Frame(B=src)
+    assert DT.shape == (5, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.float64)
+    assert DT.names == ("B",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python3():
+    src = [[], [], [], []]
+    DT = dt.Frame(D=src)
+    assert DT.shape == (4, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.void)
+    assert DT.names == ("D",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python4():
+    src = [None, [], [], [None] * 5, [], None, []]
+    DT = dt.Frame(E=src)
+    assert DT.shape == (7, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.void)
+    assert DT.names == ("E",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python5():
+    src = [["a", "b", "c"], None, ["d"], ["efg", None]]
+    DT = dt.Frame(F=src)
+    assert DT.shape == (4, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.str32)
+    assert DT.names == ("F",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python_array_of_arrays():
+    src = [
+            [[1], [2, 3]],
+            [],
+            None,
+            [[0, 4, 111], None, [15, -2]]
+          ]
+    DT = dt.Frame(N=src)
+    assert DT.shape == (4, 1)
+    assert DT.type == dt.Type.arr32(dt.Type.arr32(dt.Type.int32))
+    assert DT.names == ("N",)
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python_nested():
+    src = [[[[[[]]]]]]
+    DT = dt.Frame(Q=src)
+    a = dt.Type.arr32
+    assert DT.shape == (1, 1)
+    assert DT.type == a(a(a(a(a(dt.Type.void)))))
+    assert DT.to_list() == [src]
+
+
+def test_create_from_python_array_incompatible_child_types():
+    src = [[1, 2, 3], ["one"]]
+    msg = "Cannot create column: element at index 3 is of type " \
+          "<class 'str'>, whereas previous elements were int32"
+    with pytest.raises(TypeError, match=msg):
+        DT = dt.Frame(E=src)
+
+
+
+#-------------------------------------------------------------------------------
+# Convert to (any)
+#-------------------------------------------------------------------------------
+
+def test_arr32_repr_in_terminal():
+    DT = dt.Frame(A=[[1], [2, 3], None, [4, 5, 6], []])
+    assert str(DT) == (
+        "   | A           \n"
+        "   | arr32(int32)\n"
+        "-- + ------------\n"
+        " 0 | [1]         \n"
+        " 1 | [2, 3]      \n"
+        " 2 | NA          \n"
+        " 3 | [4, 5, 6]   \n"
+        " 4 | []          \n"
+        "[5 rows x 1 column]\n"
+    )
+
+
+def test_arr32_repr_in_terminal2():
+    DT = dt.Frame(A=[['abeerfaer'] * 30])
+    assert str(DT) == (
+        "   | A                                                                                                   \n"
+        "   | arr32(str32)                                                                                        \n"
+        "-- + ----------------------------------------------------------------------------------------------------\n"
+        " 0 | [abeerfaer, abeerfaer, abeerfaer, abeerfaer, abeerfaer, abeerfaer, abeerfaer, abeerfaer, abeerf…, …]\n"
+        "[1 row x 1 column]\n"
+    )
+
+
+def test_arr32_arr32_repr():
+    DT = dt.Frame(V=[[[1, 2, 3], [4, 9]], None, [None], [[-1], [0, 13]]])
+    assert str(DT) == (
+        "   | V                  \n"
+        "   | arr32(arr32(int32))\n"
+        "-- + -------------------\n"
+        " 0 | [[1, 2, 3], [4, 9]]\n"
+        " 1 | NA                 \n"
+        " 2 | [NA]               \n"
+        " 3 | [[-1], [0, 13]]    \n"
+        "[4 rows x 1 column]\n"
+    )
+
+
+def test_arr32_of_strings_repr():
+    DT = dt.Frame(W=[['ad', 'dfkvjn'], ['b b, f', None], ['r', 'w', 'dfvdf']])
+    assert str(DT) == (
+        "   | W            \n"
+        "   | arr32(str32) \n"
+        "-- + -------------\n"
+        " 0 | [ad, dfkvjn] \n"
+        " 1 | [b b, f, NA] \n"
+        " 2 | [r, w, dfvdf]\n"
+        "[3 rows x 1 column]\n"
+    )
