@@ -40,6 +40,11 @@ Column Column::new_data_column(size_t nrows, dt::SType stype) {
 }
 
 
+Column Column::new_na_column(size_t nrows, dt::Type type) {
+  return Column(new dt::ConstNa_ColumnImpl(nrows, type));
+}
+
+
 Column Column::new_na_column(size_t nrows, dt::SType stype) {
   return Column(new dt::ConstNa_ColumnImpl(nrows, stype));
 }
@@ -156,7 +161,7 @@ size_t Column::nrows() const noexcept {
 }
 
 size_t Column::na_count() const {
-  return stats()->nacount();
+  return impl_->null_count();
 }
 
 const dt::Type& Column::type() const noexcept {
@@ -200,6 +205,13 @@ size_t Column::memory_footprint() const noexcept {
   return sizeof(Column) + (impl_? impl_->memory_footprint() : 0);
 }
 
+size_t Column::n_children() const noexcept {
+  return impl_? impl_->n_children() : 0;
+}
+
+const Column& Column::child(size_t i) const {
+  return impl_->child(i);
+}
 
 
 //------------------------------------------------------------------------------
@@ -261,7 +273,10 @@ static inline py::oobj getelem(const Column& col, size_t i) {
 }
 
 py::oobj Column::get_element_as_pyobject(size_t i) const {
-  switch (stype()) {
+  dt::SType st = type().is_categorical()? child(0).stype()
+                                        : stype();
+
+  switch (st) {
     case dt::SType::VOID:    return py::None();
     case dt::SType::BOOL: {
       int8_t x;
@@ -313,7 +328,10 @@ py::oobj Column::get_element_as_pyobject(size_t i) const {
 }
 
 bool Column::get_element_isvalid(size_t i) const {
-  switch (stype()) {
+  dt::SType st = type().is_categorical()? child(0).stype()
+                                        : stype();
+
+  switch (st) {
     case dt::SType::VOID: return false;
     case dt::SType::BOOL:
     case dt::SType::INT8: {
@@ -349,7 +367,7 @@ bool Column::get_element_isvalid(size_t i) const {
     }
     default:
       throw NotImplError() << "Unable to check validity of the element "
-        << "for stype: `" << stype() << "`";
+        << "for type: `" << type() << "`";
   }
 }
 

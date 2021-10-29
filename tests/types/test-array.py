@@ -84,7 +84,7 @@ def test_type_array_hashable():
 
 
 @pytest.mark.parametrize('src', [0, 1])
-def test_query_methods(src):
+def test_type_array_query_methods(src):
     tarr = dt.Type.arr32(int) if src else \
            dt.Type.arr64(str)
     assert     tarr.is_array
@@ -122,6 +122,8 @@ def test_create_from_python1():
     assert DT.shape == (6, 1)
     assert DT.type == dt.Type.arr32(dt.Type.int32)
     assert DT.names == ("A",)
+    assert DT.ltypes == (dt.ltype.invalid,) # These properties are deprecated, also
+    assert DT.stypes == (dt.stype.arr32,)   # see issue #3142
     assert DT.to_list() == [src]
 
 
@@ -248,3 +250,81 @@ def test_arr32_of_strings_repr():
         " 2 | [r, w, dfvdf]\n"
         "[3 rows x 1 column]\n"
     )
+
+
+def test_arr32_to_jay():
+    DT = dt.Frame(W=[['ad', 'dfkvjn'], ['b b, f', None], ['r', 'w', 'dfvdf']])
+    assert DT.type == dt.Type.arr32(dt.Type.str32)
+    out = DT.to_jay()
+    RES = dt.fread(out)
+    assert_equals(RES, DT)
+
+
+def test_arr32_to_and_from_numpy(np):
+    src = [[3, 9, 0], None, [11, -1, 3, 23], [None], [], [0]]
+    DT = dt.Frame(S=src)
+    assert DT.type == dt.Type.arr32(dt.Type.int32)
+    arr = DT.to_numpy()
+    assert arr.dtype == np.dtype('object')
+    assert arr.T.tolist() == [src]
+    DT2 = dt.Frame(arr, names=['S'])
+    assert_equals(DT, DT2)
+
+
+def test_arr32_to_and_from_pandas(pd):
+    src = [[3, 9, 0], None, [11, -1, 3, 23], [None], [], [0]]
+    DT = dt.Frame(S=src)
+    assert DT.type == dt.Type.arr32(dt.Type.int32)
+    pdf = DT.to_pandas()
+    assert pdf.dtypes[0] == object
+    assert pdf.columns.tolist() == ['S']
+    assert pdf['S'].tolist() == src
+    DT2 = dt.Frame(pdf)
+    assert_equals(DT, DT2)
+
+
+
+
+#-------------------------------------------------------------------------------
+# Casts
+#-------------------------------------------------------------------------------
+
+def test_void_to_arr32():
+    DT = dt.Frame([None] * 11)
+    DT[0] = dt.Type.arr32(dt.Type.str32)
+    assert DT.type == dt.Type.arr32(dt.Type.str32)
+    assert DT.to_list() == [[None] * 11]
+
+
+def test_obj_to_arr32():
+    DT = dt.Frame(A=[None, [1, 2], [5, 8, None], []], type=object)
+    DT['A'] = dt.Type.arr32(dt.Type.int32)
+    assert_equals(DT,
+        dt.Frame(A=[None, [1, 2], [5, 8, None], []])
+    )
+
+
+def test_obj_to_arr32_bad():
+    DT = dt.Frame(A=[["hi"], [1, 2, 3]], type=object)
+    DT['A'] = dt.Type.arr32('int32')
+    assert_equals(DT,
+        dt.Frame(A=[[None], [1, 2, 3]])
+    )
+
+
+def test_arr_to_arr():
+    DT = dt.Frame(A=[[1, 5], [12, None], [-99]])
+    assert DT.type == dt.Type.arr32(dt.Type.int32)
+    DT['A'] = dt.Type.arr32(dt.Type.int64)
+    assert DT.type == dt.Type.arr32(dt.Type.int64)
+    assert DT.to_list() == [[[1, 5], [12, None], [-99]]]
+    DT['A'] = dt.Type.arr32(str)
+    assert DT.type == dt.Type.arr32(dt.Type.str32)
+    assert DT.to_list() == [[['1', '5'], ['12', None], ['-99']]]
+
+
+def test_arr_to_obj():
+    DT = dt.Frame(A=[None, [1, 5], [12, None], [-99]])
+    DT['A'] = dt.Type.obj64
+    assert DT.type == dt.Type.obj64
+    assert DT.to_list() == [[None, [1, 5], [12, None], [-99]]]

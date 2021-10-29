@@ -25,6 +25,7 @@ namespace dt {
 
 
 extern const char* doc_dt_as_type;
+extern const char* doc_FExpr_as_type;
 extern const char* doc_dt_by;
 extern const char* doc_dt_cbind;
 extern const char* doc_dt_corr;
@@ -44,6 +45,7 @@ extern const char* doc_dt_max;
 extern const char* doc_dt_mean;
 extern const char* doc_dt_median;
 extern const char* doc_dt_min;
+extern const char* doc_dt_nunique;
 extern const char* doc_dt_qcut;
 extern const char* doc_dt_rbind;
 extern const char* doc_dt_repeat;
@@ -300,8 +302,13 @@ extern const char* doc_Namespace;
 extern const char* doc_Type;
 extern const char* doc_Type_arr32;
 extern const char* doc_Type_arr64;
+extern const char* doc_Type_cat8;
+extern const char* doc_Type_cat16;
+extern const char* doc_Type_cat32;
+
 extern const char* doc_Type_is_array;
 extern const char* doc_Type_is_boolean;
+extern const char* doc_Type_is_categorical;
 extern const char* doc_Type_is_compound;
 extern const char* doc_Type_is_float;
 extern const char* doc_Type_is_integer;
@@ -310,6 +317,7 @@ extern const char* doc_Type_is_object;
 extern const char* doc_Type_is_string;
 extern const char* doc_Type_is_temporal;
 extern const char* doc_Type_is_void;
+
 extern const char* doc_Type_max;
 extern const char* doc_Type_min;
 extern const char* doc_Type_name;

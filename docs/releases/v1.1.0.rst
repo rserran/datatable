@@ -10,6 +10,8 @@
         be saved into CSV. The values in the object column will be stringified
         upon saving. [#3064]
 
+    -[enh] :meth:`.replace` now supports numpy scalars. [#3164]
+
     -[fix] Void columns can now be used with :func:`dt.sort()` and :func:`dt.by()`.
         In addition, datatable will now skip sorting any column that it knows contains
         constant values. [#3088] [#3104] [#3108] [#3109]
@@ -24,6 +26,9 @@
 
     -[fix] Fixed a crash which could have occurred when sorting very long
         identical or nearly identical strings. [#3134]
+
+    -[fix] Fixed support for :attr:`.max_column_width <datatable.options.display.max_column_width>`
+        option when rendering frames in Jupyter notebooks. [#3160]
 
     -[api] Converting a column of :attr:`void <dt.Type.void>` type into pandas
         now produces a pandas ``object`` column filled with ``None``s. Converting
@@ -44,11 +49,14 @@
 
     FExpr
     -----
-    .. current-module:: datatable
+    .. current-class:: datatable.FExpr
 
-    -[enh] Added reducer function :func:`countna` [#2999]
+    -[new] Class :class:`dt.FExpr` now has method :meth:`.as_type()`,
+      which behaves exactly as the equivalent base level function :func:`dt.as_type()`.
 
-    -[fix] :func:`qcut` won't segfault anymore when used as an i-filter [#3061]
+    -[enh] Added reducer functions :func:`dt.countna()` and :func:`dt.nunique()`  [#2999]
+
+    -[fix] :func:`dt.qcut()` won't segfault anymore when used as an i-filter [#3061]
 
 
     fread
