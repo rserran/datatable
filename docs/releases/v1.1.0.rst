@@ -65,7 +65,7 @@
     -[new] Class :class:`dt.FExpr` now has method :meth:`.as_type()`,
       which behaves exactly as the equivalent base level function :func:`dt.as_type()`.
 
-    -[new] Added functions :func:`dt.rowargmin()` and :func:`dt.rowargmin()`to find the
+    -[new] Added functions :func:`dt.rowargmin()` and :func:`dt.rowargmin()` to find the
       index of the largest and smallest values among columns of each row. [#2998]
 
     -[new] Added reducer function :func:`dt.prod()` and the corresponding :meth:`.prod()`
@@ -93,6 +93,9 @@
     -[fix] Fixed selection of ``time64`` columns by python class name. [#3253]
 
     -[fix] Fixed :func:`dt.shift()` behaviour on grouped columns. [#3269] [#3272]
+
+    -[fix] Reducer functions :func:`dt.prod()` and :func:`dt.sum()` can now be
+       applied to :attr:`void <dt.Type.void>` columns. [#3281] [#3282]
 
 
     fread
