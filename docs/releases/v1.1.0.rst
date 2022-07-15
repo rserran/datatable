@@ -78,6 +78,9 @@
       the corresponding :meth:`.cummin()` and :meth:`.cummax()` methods,
       to calculate the cumulative minimum and maximum of values per column. [#3279]
 
+    -[new] Added function :func:`dt.cumprod()`, as well as :meth:`.cumprod()` method,
+      to calculate the cumulative product of values per column. [#3279]
+
     -[enh] Added reducer functions :func:`dt.countna()` and :func:`dt.nunique()`. [#2999]
 
     -[new] Class :class:`dt.FExpr` now has method :meth:`.nunique()`,
@@ -155,8 +158,11 @@
 
     -[enh] Added support for Python `3.10`. [#3210]
 
-
     -[enh] Parameter ``force=True`` in function :func:`rbind()` (or method
         :meth:`dt.Frame.rbind()`) will now allow combining columns
         of incompatible types. [#3062]
+
+    -[enh] datatable's thread pool can now be used to parallelize external C++ applications
+        and will have no specific datatable dependencies, when the code is built with
+        ``DT_DISABLE`` variable being defined. [#3306]
 
