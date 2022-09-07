@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
-# Copyright 2018-2021 H2O.ai
+# Copyright 2018-2022 H2O.ai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -474,6 +474,44 @@ def test_method(capsys, tempfile):
     assert err == ""
 
 
+#-------------------------------------------------------------------------------
+# Parameter sep=
+#-------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("sep", ["", "\r\n", "\t\t", ";;;"])
+def test_sep_wrong(sep):
+    DT = dt.Frame([3, 14, 15])
+    msg = r"Parameter sep in Frame.to_csv\(\) should be a single-character " \
+           "string, instead its length is " + str(len(sep))
+    with pytest.raises(ValueError, match=msg):
+        DT.to_csv(sep=sep)
+
+
+@pytest.mark.parametrize("sep", [None, ",", ";", "\t"])
+def test_sep_simple(sep):
+    DT = dt.Frame([[1, 4, 5],
+                  [True, False, None],
+                  ["foo", None, "bar"]],
+                 names=["A", "B", "C"])
+    out = DT.to_csv(sep = sep)
+
+    if sep is None:
+        sep = ","
+
+    ref = ""
+    ref += 'A'+sep+'B'+sep+'C\n'
+    ref += '1'+sep+'1'+sep+'foo\n'
+    ref += '4'+sep+'0'+sep+'\n'
+    ref += '5'+sep+''+sep+'bar\n'
+
+    assert out == ref
+    assert_equals(dt.fread(out, na_strings=[""]), DT)
+
+
+#-------------------------------------------------------------------------------
+# Parameter quoting=
+#-------------------------------------------------------------------------------
+
 def test_quoting():
     import csv
     DT = dt.Frame(A=range(5),
@@ -494,8 +532,8 @@ def test_quoting():
     answer1 = ('"A","B","C","D"\n'
                '"0","1","0.77","once"\n'
                '"1","0","-3.14","up\'on"\n'
-               '"2",,"inf","  a time  "\n'
-               '"3",,,\n'
+               '"2","","inf","  a time  "\n'
+               '"3","","",""\n'
                '"4","1","200.001",", THE END"\n')
     for q in [csv.QUOTE_ALL, "all", "ALL"]:
         out = DT.to_csv(quoting=q)
@@ -534,6 +572,10 @@ def test_quoting_invalid():
         with pytest.raises(ValueError, match=msg):
             DT.to_csv(quoting=q)
 
+
+#-------------------------------------------------------------------------------
+# Parameter compression=
+#-------------------------------------------------------------------------------
 
 def test_compress1():
     DT = dt.Frame(A=range(5))
