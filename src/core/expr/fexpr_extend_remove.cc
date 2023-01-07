@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright 2018-2022 H2O.ai
+// Copyright 2022 H2O.ai
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -19,32 +19,47 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
-#ifndef dt_PYTHON_h
-#define dt_PYTHON_h
-
-// `locale` must be included before `Python.h`, otherwise datatable won't
-// compile on macOS with Apple LLVM clang 9.1.0
-#include <locale>
-#include <Python.h>
+#include "expr/eval_context.h"
+#include "expr/fexpr_extend_remove.h"
+namespace dt {
+namespace expr {
 
 
-// The following code has been adopted from python/pythoncapi-compat, see
-// https://github.com/python/pythoncapi-compat/blob/main/pythoncapi_compat.h
-//
-// As per bpo-39573, `Py_SET_REFCNT()` and `Py_SET_TYPE()` are only available
-// as of python 3.9.0a4, so for older versions we have to directly change
-// the corresponding `ob_*` properties.
-#if PY_VERSION_HEX < 0x030900A4
-  static inline void _Py_SET_REFCNT(PyObject *ob, Py_ssize_t refcnt) {
-    ob->ob_refcnt = refcnt;
+template <bool EXTEND>
+FExpr_Extend_Remove<EXTEND>::FExpr_Extend_Remove(ptrExpr&& arg, ptrExpr&& other) :
+  arg_(std::move(arg)),
+  other_(std::move(other))
+  {}
+
+
+template <bool EXTEND>
+std::string FExpr_Extend_Remove<EXTEND>::repr() const {
+  std::string out = EXTEND? "extend" : "remove";
+  out += '(';
+  out += arg_->repr();
+  out += ", ";
+  out += other_->repr();
+  out += ')';
+  return out;
+}
+
+
+template <bool EXTEND>
+Workframe FExpr_Extend_Remove<EXTEND>::evaluate_n(EvalContext& ctx) const {
+  Workframe wf = arg_->evaluate_n(ctx);
+  Workframe wf_other = other_->evaluate_n(ctx);
+  if (EXTEND){
+    wf.cbind(std::move(wf_other));
+  } else {
+    wf.remove(std::move(wf_other));
   }
-  #define Py_SET_REFCNT(ob, refcnt) _Py_SET_REFCNT(reinterpret_cast<PyObject*>(ob), refcnt)
+  
+  return wf;
+}
 
-  static inline void _Py_SET_TYPE(PyObject *ob, PyTypeObject *type) {
-    ob->ob_type = type;
-  }
-  #define Py_SET_TYPE(ob, type) _Py_SET_TYPE(reinterpret_cast<PyObject*>(ob), type)
-#endif
 
-#endif
+template class FExpr_Extend_Remove<true>;
+template class FExpr_Extend_Remove<false>;
 
+
+}}  // dt::expr
