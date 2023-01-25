@@ -19,43 +19,42 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
-#ifndef dt_COLUMN_SUMPROD_h
-#define dt_COLUMN_SUMPROD_h
+#ifndef dt_COLUMN_MEAN_h
+#define dt_COLUMN_MEAN_h
 #include "column/reduce_unary.h"
-#include "models/utils.h"   // ipow
 namespace dt {
 
 
-template <typename T, bool SUM, bool IS_GROUPED>
-class SumProd_ColumnImpl : public ReduceUnary_ColumnImpl<T, IS_GROUPED> {
+template <typename T, bool IS_GROUPED>
+class Mean_ColumnImpl : public ReduceUnary_ColumnImpl<T, IS_GROUPED> {
   public:
     using ReduceUnary_ColumnImpl<T, IS_GROUPED>::ReduceUnary_ColumnImpl;
 
     bool get_element(size_t i, T* out) const override {
-      T result = !SUM; // 0 for `sum()` and 1 for `prod()`
       T value;
       size_t i0, i1;
       this->gby_.get_group(i, &i0, &i1);
 
       if (IS_GROUPED){
-        size_t nrows = i1 - i0;
         bool is_valid = this->col_.get_element(i, &value);
-        if (is_valid){
-          result = SUM? static_cast<T>(nrows) * value
-                      : ipow(value, nrows);
-        }
+        if (!is_valid) return false;
+        *out = static_cast<T>(value);
+        return true;
       } else {
+        double sum = 0;
+        int64_t count = 0;
         for (size_t gi = i0; gi < i1; ++gi) {
           bool is_valid = this->col_.get_element(gi, &value);
-          if (is_valid){
-            result = SUM? result + value
-                        : result * value;
+          if (is_valid) {
+            sum += static_cast<double>(value);
+            count++;
           }
         }
+        if (!count) return false;
+        *out = static_cast<T>(sum / static_cast<double>(count));
+        return true;
       }
 
-      *out = result;
-      return true; // the result is never a missing value
     }
 };
 

@@ -21,7 +21,7 @@
 //------------------------------------------------------------------------------
 #include "column/const.h"
 #include "column/latent.h"
-#include "column/sumprod.h"
+#include "column/mean.h"
 #include "documentation.h"
 #include "expr/fexpr_func.h"
 #include "expr/eval_context.h"
@@ -32,17 +32,16 @@ namespace dt {
 namespace expr {
 
 
-template <bool SUM>
-class FExpr_SumProd : public FExpr_Func {
+class FExpr_Mean : public FExpr_Func {
   private:
     ptrExpr arg_;
 
   public:
-    FExpr_SumProd(ptrExpr &&arg)
+    FExpr_Mean(ptrExpr &&arg)
       : arg_(std::move(arg)) {}
 
     std::string repr() const override {
-      std::string out = SUM? "sum" : "prod";
+      std::string out = "mean";
       out += '(';
       out += arg_->repr();
       out += ')';
@@ -57,17 +56,17 @@ class FExpr_SumProd : public FExpr_Func {
 
       if (!gby) {
         gby = Groupby::single_group(wf.nrows());
-      }
+      } 
 
       for (size_t i = 0; i < wf.ncols(); ++i) {
-         bool is_grouped = ctx.has_group_column(
-                             wf.get_frame_id(i),
-                             wf.get_column_id(i)
-                           );
-         Column coli = evaluate1(wf.retrieve_column(i), gby, is_grouped);
-         outputs.add_column(std::move(coli), wf.retrieve_name(i), Grouping::GtoONE);
+        bool is_grouped = ctx.has_group_column(
+                            wf.get_frame_id(i),
+                            wf.get_column_id(i)
+                          );
+        Column coli = evaluate1(wf.retrieve_column(i), gby, is_grouped);        
+        outputs.add_column(std::move(coli), wf.retrieve_name(i), Grouping::GtoONE);         
       }
-
+        
       return outputs;
     }
 
@@ -76,18 +75,30 @@ class FExpr_SumProd : public FExpr_Func {
       SType stype = col.stype();
 
       switch (stype) {
-        case SType::VOID:
-          return Column(new ConstInt_ColumnImpl(gby.size(), !SUM, SType::INT64));
+        case SType::VOID: return Column(new ConstNa_ColumnImpl(
+                            gby.size(), SType::FLOAT64
+                          ));
         case SType::BOOL:
         case SType::INT8:
         case SType::INT16:
-        case SType::INT32:
+        case SType::INT32:        
         case SType::INT64:
-          return make<int64_t>(std::move(col), SType::INT64, gby, is_grouped);
-        case SType::FLOAT32:
-          return make<float>(std::move(col), SType::FLOAT32, gby, is_grouped);
         case SType::FLOAT64:
           return make<double>(std::move(col), SType::FLOAT64, gby, is_grouped);
+        case SType::FLOAT32:
+          return make<float>(std::move(col), SType::FLOAT32, gby, is_grouped);
+
+        case SType::DATE32: {
+          Column coli = make<double>(std::move(col), SType::FLOAT64, gby, is_grouped);
+          coli.cast_inplace(SType::DATE32);
+          return coli;
+        }
+        case SType::TIME64: {
+          Column coli = make<double>(std::move(col), SType::FLOAT64, gby, is_grouped);
+          coli.cast_inplace(SType::TIME64);
+          return coli;
+        }           
+        
         default:
           throw TypeError()
             << "Invalid column of type `" << stype << "` in " << repr();
@@ -98,12 +109,13 @@ class FExpr_SumProd : public FExpr_Func {
     template <typename T>
     Column make(Column &&col, SType stype, const Groupby& gby, bool is_grouped) const {
       col.cast_inplace(stype);
+
       if (is_grouped) {
-        return Column(new Latent_ColumnImpl(new SumProd_ColumnImpl<T, SUM, true>(
+        return Column(new Latent_ColumnImpl(new Mean_ColumnImpl<T, true>(
           std::move(col), gby
         )));
       } else {
-        return Column(new Latent_ColumnImpl(new SumProd_ColumnImpl<T, SUM, false>(
+        return Column(new Latent_ColumnImpl(new Mean_ColumnImpl<T, false>(
           std::move(col), gby
         )));
       }
@@ -111,28 +123,14 @@ class FExpr_SumProd : public FExpr_Func {
 };
 
 
-static py::oobj pyfn_sum(const py::XArgs &args) {
-  auto sum = args[0].to_oobj();
-  return PyFExpr::make(new FExpr_SumProd<true>(as_fexpr(sum)));
+static py::oobj pyfn_mean(const py::XArgs &args) {
+  auto mean = args[0].to_oobj();
+  return PyFExpr::make(new FExpr_Mean(as_fexpr(mean)));
 }
 
-
-static py::oobj pyfn_prod(const py::XArgs &args) {
-  auto prod = args[0].to_oobj();
-  return PyFExpr::make(new FExpr_SumProd<false>(as_fexpr(prod)));
-}
-
-
-DECLARE_PYFN(&pyfn_sum)
-    ->name("sum")
-    ->docs(doc_dt_sum)
-    ->arg_names({"cols"})
-    ->n_positional_args(1)
-    ->n_required_args(1);
-
-DECLARE_PYFN(&pyfn_prod)
-    ->name("prod")
-    ->docs(doc_dt_prod)
+DECLARE_PYFN(&pyfn_mean)
+    ->name("mean")
+    ->docs(doc_dt_mean)
     ->arg_names({"cols"})
     ->n_positional_args(1)
     ->n_required_args(1);
